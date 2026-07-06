@@ -4916,13 +4916,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4ef16af4eae64433ebddfb4082fa4ee0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::WheelchairController
+  pushForce: 0.45
   maxForwardSpeed: 2
   maxBackwardSpeed: 1
-  acceleration: 3.5
-  deceleration: 5.5
+  naturalDeceleration: 1.8
+  brakeDeceleration: 5.5
+  brakeKey: 32
+  turnForce: 60
   maxTurnSpeed: 85
-  turnAcceleration: 6
-  idleTurnMultiplier: 0.45
+  turnDeceleration: 3.5
   groundCheckDistance: 1.15
   groundLayer:
     serializedVersion: 2

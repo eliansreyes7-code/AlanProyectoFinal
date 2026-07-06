@@ -2,25 +2,26 @@ using UnityEngine;
 
 public class WheelchairController : MonoBehaviour
 {
-    [Header("Movement")]
+    [Header("Wheel Push")]
+    [SerializeField] private float pushForce = 0.45f;
     [SerializeField] private float maxForwardSpeed = 2.0f;
     [SerializeField] private float maxBackwardSpeed = 1.0f;
-    [SerializeField] private float acceleration = 3.5f;
-    [SerializeField] private float deceleration = 5.5f;
+    [SerializeField] private float naturalDeceleration = 1.8f;
+
+    [Header("Brake")]
+    [SerializeField] private float brakeDeceleration = 5.5f;
+    [SerializeField] private KeyCode brakeKey = KeyCode.Space;
 
     [Header("Rotation")]
-    [SerializeField] private float maxTurnSpeed = 85f;
-    [SerializeField] private float turnAcceleration = 6f;
-    [SerializeField] private float idleTurnMultiplier = 0.45f;
+    [SerializeField] private float turnForce = 55f;
+    [SerializeField] private float maxTurnSpeed = 90f;
+    [SerializeField] private float turnDeceleration = 3.5f;
 
     [Header("Ground Check")]
     [SerializeField] private float groundCheckDistance = 1.15f;
     [SerializeField] private LayerMask groundLayer;
 
     private Rigidbody rb;
-
-    private float moveInput;
-    private float turnInput;
 
     private float currentSpeed;
     private float currentTurnSpeed;
@@ -42,21 +43,28 @@ public class WheelchairController : MonoBehaviour
         rb.isKinematic = false;
         rb.interpolation = RigidbodyInterpolation.Interpolate;
         rb.collisionDetectionMode = CollisionDetectionMode.Continuous;
-
         rb.constraints = RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationZ;
     }
 
     private void Update()
     {
-        moveInput = Input.GetAxisRaw("Vertical");
-        turnInput = Input.GetAxisRaw("Horizontal");
+        if (!isGrounded) return;
+
+        bool reverseMode = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
+
+        if (Input.GetKeyDown(KeyCode.Q))
+            PushLeftWheel(reverseMode);
+
+        if (Input.GetKeyDown(KeyCode.E))
+            PushRightWheel(reverseMode);
     }
 
     private void FixedUpdate()
     {
         CheckGround();
-        HandleMovement();
-        HandleRotation();
+        ApplyMovement();
+        ApplyRotation();
+        ApplyDeceleration();
     }
 
     private void CheckGround()
@@ -64,43 +72,33 @@ public class WheelchairController : MonoBehaviour
         isGrounded = Physics.Raycast(transform.position, Vector3.down, groundCheckDistance, groundLayer);
     }
 
-    private void HandleMovement()
+    private void PushLeftWheel(bool reverse)
     {
-        if (!isGrounded)
-            return;
+        float direction = reverse ? -1f : 1f;
 
-        float targetSpeed = 0f;
+        currentSpeed += pushForce * direction;
+        currentTurnSpeed += turnForce * direction;
+    }
 
-        if (moveInput > 0)
-            targetSpeed = maxForwardSpeed;
-        else if (moveInput < 0)
-            targetSpeed = -maxBackwardSpeed;
+    private void PushRightWheel(bool reverse)
+    {
+        float direction = reverse ? -1f : 1f;
 
-        float changeRate = Mathf.Abs(targetSpeed) > 0.01f ? acceleration : deceleration;
+        currentSpeed += pushForce * direction;
+        currentTurnSpeed -= turnForce * direction;
+    }
 
-        currentSpeed = Mathf.MoveTowards(
-            currentSpeed,
-            targetSpeed,
-            changeRate * Time.fixedDeltaTime
-        );
+    private void ApplyMovement()
+    {
+        currentSpeed = Mathf.Clamp(currentSpeed, -maxBackwardSpeed, maxForwardSpeed);
 
         Vector3 movement = transform.forward * currentSpeed * Time.fixedDeltaTime;
         rb.MovePosition(rb.position + movement);
     }
 
-    private void HandleRotation()
+    private void ApplyRotation()
     {
-        if (!isGrounded)
-            return;
-
-        float movementFactor = Mathf.Abs(currentSpeed) > 0.15f ? 1f : idleTurnMultiplier;
-        float targetTurnSpeed = turnInput * maxTurnSpeed * movementFactor;
-
-        currentTurnSpeed = Mathf.MoveTowards(
-            currentTurnSpeed,
-            targetTurnSpeed,
-            turnAcceleration * maxTurnSpeed * Time.fixedDeltaTime
-        );
+        currentTurnSpeed = Mathf.Clamp(currentTurnSpeed, -maxTurnSpeed, maxTurnSpeed);
 
         Quaternion turnRotation = Quaternion.Euler(
             0f,
@@ -109,5 +107,25 @@ public class WheelchairController : MonoBehaviour
         );
 
         rb.MoveRotation(rb.rotation * turnRotation);
+    }
+
+    private void ApplyDeceleration()
+    {
+        bool isBraking = Input.GetKey(brakeKey);
+
+        float speedDeceleration = isBraking ? brakeDeceleration : naturalDeceleration;
+        float rotationDeceleration = isBraking ? brakeDeceleration * maxTurnSpeed : turnDeceleration * maxTurnSpeed;
+
+        currentSpeed = Mathf.MoveTowards(
+            currentSpeed,
+            0f,
+            speedDeceleration * Time.fixedDeltaTime
+        );
+
+        currentTurnSpeed = Mathf.MoveTowards(
+            currentTurnSpeed,
+            0f,
+            rotationDeceleration * Time.fixedDeltaTime
+        );
     }
 }
