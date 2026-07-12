@@ -128,4 +128,10 @@ public class WheelchairController : MonoBehaviour
             rotationDeceleration * Time.fixedDeltaTime
         );
     }
+
+    public void ReduceSpeed(float multiplier)
+    {
+        currentSpeed *= multiplier;
+        currentTurnSpeed *= multiplier;
+    }
 }
