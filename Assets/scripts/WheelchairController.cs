@@ -4,8 +4,8 @@ public class WheelchairController : MonoBehaviour
 {
     [Header("Wheel Push")]
     [SerializeField] private float pushForce = 0.45f;
-    [SerializeField] private float maxForwardSpeed = 2.0f;
-    [SerializeField] private float maxBackwardSpeed = 1.0f;
+    [SerializeField] private float maxForwardSpeed = 2f;
+    [SerializeField] private float maxBackwardSpeed = 1f;
     [SerializeField] private float naturalDeceleration = 1.8f;
 
     [Header("Brake")]
@@ -18,7 +18,8 @@ public class WheelchairController : MonoBehaviour
     [SerializeField] private float turnDeceleration = 3.5f;
 
     [Header("Ground Check")]
-    [SerializeField] private float groundCheckDistance = 1.15f;
+    [SerializeField] private Transform groundCheck;
+    [SerializeField] private float groundCheckDistance = 0.25f;
     [SerializeField] private LayerMask groundLayer;
 
     private Rigidbody rb;
@@ -34,7 +35,14 @@ public class WheelchairController : MonoBehaviour
 
         if (rb == null)
         {
-            Debug.LogError("WheelchairController necesita un Rigidbody en el mismo objeto.");
+            Debug.LogError("No se encontró un Rigidbody en el Player.");
+            enabled = false;
+            return;
+        }
+
+        if (groundCheck == null)
+        {
+            Debug.LogError("No has asignado el objeto GroundCheck.");
             enabled = false;
             return;
         }
@@ -43,14 +51,19 @@ public class WheelchairController : MonoBehaviour
         rb.isKinematic = false;
         rb.interpolation = RigidbodyInterpolation.Interpolate;
         rb.collisionDetectionMode = CollisionDetectionMode.Continuous;
-        rb.constraints = RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationZ;
+
+        rb.constraints =
+            RigidbodyConstraints.FreezeRotationX |
+            RigidbodyConstraints.FreezeRotationZ;
     }
 
     private void Update()
     {
-        if (!isGrounded) return;
+        CheckGround();
 
-        bool reverseMode = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
+        bool reverseMode =
+            Input.GetKey(KeyCode.LeftShift) ||
+            Input.GetKey(KeyCode.RightShift);
 
         if (Input.GetKeyDown(KeyCode.Q))
             PushLeftWheel(reverseMode);
@@ -61,7 +74,6 @@ public class WheelchairController : MonoBehaviour
 
     private void FixedUpdate()
     {
-        CheckGround();
         ApplyMovement();
         ApplyRotation();
         ApplyDeceleration();
@@ -69,11 +81,19 @@ public class WheelchairController : MonoBehaviour
 
     private void CheckGround()
     {
-        isGrounded = Physics.Raycast(transform.position, Vector3.down, groundCheckDistance, groundLayer);
+        isGrounded = Physics.Raycast(
+            groundCheck.position,
+            Vector3.down,
+            groundCheckDistance,
+            groundLayer
+        );
     }
 
     private void PushLeftWheel(bool reverse)
     {
+        if (!isGrounded)
+            return;
+
         float direction = reverse ? -1f : 1f;
 
         currentSpeed += pushForce * direction;
@@ -82,6 +102,9 @@ public class WheelchairController : MonoBehaviour
 
     private void PushRightWheel(bool reverse)
     {
+        if (!isGrounded)
+            return;
+
         float direction = reverse ? -1f : 1f;
 
         currentSpeed += pushForce * direction;
@@ -90,41 +113,58 @@ public class WheelchairController : MonoBehaviour
 
     private void ApplyMovement()
     {
-        currentSpeed = Mathf.Clamp(currentSpeed, -maxBackwardSpeed, maxForwardSpeed);
+        currentSpeed = Mathf.Clamp(
+            currentSpeed,
+            -maxBackwardSpeed,
+            maxForwardSpeed
+        );
 
-        Vector3 movement = transform.forward * currentSpeed * Time.fixedDeltaTime;
+        Vector3 movement =
+            transform.forward *
+            currentSpeed *
+            Time.fixedDeltaTime;
+
         rb.MovePosition(rb.position + movement);
     }
 
     private void ApplyRotation()
     {
-        currentTurnSpeed = Mathf.Clamp(currentTurnSpeed, -maxTurnSpeed, maxTurnSpeed);
+        currentTurnSpeed = Mathf.Clamp(
+            currentTurnSpeed,
+            -maxTurnSpeed,
+            maxTurnSpeed
+        );
 
-        Quaternion turnRotation = Quaternion.Euler(
+        Quaternion rotation = Quaternion.Euler(
             0f,
             currentTurnSpeed * Time.fixedDeltaTime,
             0f
         );
 
-        rb.MoveRotation(rb.rotation * turnRotation);
+        rb.MoveRotation(rb.rotation * rotation);
     }
 
     private void ApplyDeceleration()
     {
-        bool isBraking = Input.GetKey(brakeKey);
+        bool braking = Input.GetKey(brakeKey);
 
-        float speedDeceleration = isBraking ? brakeDeceleration : naturalDeceleration;
-        float rotationDeceleration = isBraking ? brakeDeceleration * maxTurnSpeed : turnDeceleration * maxTurnSpeed;
+        float speedDeceleration =
+            braking ? brakeDeceleration : naturalDeceleration;
+
+        float rotationDeceleration =
+            braking ?
+            brakeDeceleration * maxTurnSpeed :
+            turnDeceleration * maxTurnSpeed;
 
         currentSpeed = Mathf.MoveTowards(
             currentSpeed,
-            0f,
+            0,
             speedDeceleration * Time.fixedDeltaTime
         );
 
         currentTurnSpeed = Mathf.MoveTowards(
             currentTurnSpeed,
-            0f,
+            0,
             rotationDeceleration * Time.fixedDeltaTime
         );
     }
@@ -134,4 +174,19 @@ public class WheelchairController : MonoBehaviour
         currentSpeed *= multiplier;
         currentTurnSpeed *= multiplier;
     }
+
+#if UNITY_EDITOR
+    private void OnDrawGizmosSelected()
+    {
+        if (groundCheck == null)
+            return;
+
+        Gizmos.color = isGrounded ? Color.green : Color.red;
+
+        Gizmos.DrawLine(
+            groundCheck.position,
+            groundCheck.position + Vector3.down * groundCheckDistance
+        );
+    }
+#endif
 }
