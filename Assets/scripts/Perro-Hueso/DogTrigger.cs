@@ -2,24 +2,32 @@ using UnityEngine;
 
 public class DogTrigger : MonoBehaviour
 {
-    [SerializeField] private DogAI dog;
+    [SerializeField]
+    private DogChallengeManager challengeManager;
 
     private bool activated;
 
     private void OnTriggerEnter(Collider other)
     {
-        Debug.Log("Entró: " + other.name);
-        Debug.Log("Tag detectado: " + other.tag);
-
         if (activated)
             return;
 
-        if (!other.CompareTag("Player"))
+        WheelchairController player =
+            other.GetComponentInParent
+            <WheelchairController>();
+
+        if (player == null)
             return;
 
-        Debug.Log("¡Player detectado!");
-
         activated = true;
-        dog.ActivateDog(other.transform);
+
+        challengeManager.StartDogChallenge(
+            player.transform
+        );
+    }
+
+    public void ResetTrigger()
+    {
+        activated = false;
     }
 }
