@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 96338628011232a4e8fa306a8baf604e
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 7400000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 381836
+  packageName: Wheelchair Animation
+  packageVersion: 1.0
+  assetPath: Assets/Wheelchair Animation/Assets/Animation/Move/AS_WheelChair_Run_Forward_Loop.anim
+  uploadId: 923098

@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: b88833dcaa159c8418aac67d0da16e2e
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 7400000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 381836
+  packageName: Wheelchair Animation
+  packageVersion: 1.0
+  assetPath: Assets/Wheelchair Animation/Assets/Animation/Throw/AS_WheelChair_Throw_End.anim
+  uploadId: 923098

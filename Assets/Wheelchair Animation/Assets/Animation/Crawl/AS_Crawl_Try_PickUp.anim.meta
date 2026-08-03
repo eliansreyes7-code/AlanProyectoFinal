@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 9c38ecff3318bce4889e3459372b66c9
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 7400000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 381836
+  packageName: Wheelchair Animation
+  packageVersion: 1.0
+  assetPath: Assets/Wheelchair Animation/Assets/Animation/Crawl/AS_Crawl_Try_PickUp.anim
+  uploadId: 923098

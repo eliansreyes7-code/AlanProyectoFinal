@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 4d80f39668716f14694d4a552d45404e
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 7400000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 381836
+  packageName: Wheelchair Animation
+  packageVersion: 1.0
+  assetPath: Assets/Wheelchair Animation/Assets/Animation/Torch/Offset/AS_WheelChair_Torch_Offset_FM.anim
+  uploadId: 923098

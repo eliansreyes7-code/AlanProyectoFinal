@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: fa78bc247c2885148a5b1294542115f8
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 7400000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 381836
+  packageName: Wheelchair Animation
+  packageVersion: 1.0
+  assetPath: Assets/Wheelchair Animation/Assets/Animation/Idle/AS_WheelChair_Idle2.anim
+  uploadId: 923098

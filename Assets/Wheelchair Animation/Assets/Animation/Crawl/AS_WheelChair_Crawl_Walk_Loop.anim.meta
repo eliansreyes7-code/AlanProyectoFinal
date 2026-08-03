@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 85e60e9b26cf4b0409391d1eb2631ed0
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 7400000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 381836
+  packageName: Wheelchair Animation
+  packageVersion: 1.0
+  assetPath: Assets/Wheelchair Animation/Assets/Animation/Crawl/AS_WheelChair_Crawl_Walk_Loop.anim
+  uploadId: 923098

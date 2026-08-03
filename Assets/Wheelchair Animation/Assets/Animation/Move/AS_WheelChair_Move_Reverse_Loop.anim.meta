@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: f079e40612c90584a9fb2f0eff3772d9
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 7400000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 381836
+  packageName: Wheelchair Animation
+  packageVersion: 1.0
+  assetPath: Assets/Wheelchair Animation/Assets/Animation/Move/AS_WheelChair_Move_Reverse_Loop.anim
+  uploadId: 923098

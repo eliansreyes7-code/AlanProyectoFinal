@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: ac7ce14b2745c07479b50eccbe43c504
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 7400000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 381836
+  packageName: Wheelchair Animation
+  packageVersion: 1.0
+  assetPath: Assets/Wheelchair Animation/Assets/Animation/Knife/AS_WheelChair_Knife_End.anim
+  uploadId: 923098

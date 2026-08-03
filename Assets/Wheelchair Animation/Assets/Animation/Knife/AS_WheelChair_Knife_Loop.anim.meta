@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: d2c13d1f08da81d48910ce22eb2f64b3
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 7400000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 381836
+  packageName: Wheelchair Animation
+  packageVersion: 1.0
+  assetPath: Assets/Wheelchair Animation/Assets/Animation/Knife/AS_WheelChair_Knife_Loop.anim
+  uploadId: 923098

@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: a4ad3cb8877d76d428f3d2eaad9d97b7
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 7400000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 381836
+  packageName: Wheelchair Animation
+  packageVersion: 1.0
+  assetPath: Assets/Wheelchair Animation/Assets/Animation/Knife/AS_WheelChair_Idle.anim
+  uploadId: 923098

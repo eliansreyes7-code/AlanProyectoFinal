@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 77c1e29078287bc4995eaafe42f95a41
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 7400000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 381836
+  packageName: Wheelchair Animation
+  packageVersion: 1.0
+  assetPath: Assets/Wheelchair Animation/Assets/Animation/Pistol/AS_WheelChair_Pistol_Reload.anim
+  uploadId: 923098

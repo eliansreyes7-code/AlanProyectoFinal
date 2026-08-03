@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: cbabd47f9d26113459daf5d367160f4a
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 7400000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 381836
+  packageName: Wheelchair Animation
+  packageVersion: 1.0
+  assetPath: Assets/Wheelchair Animation/Assets/Animation/Crawl/AS_Crawl_To_WheelChair.anim
+  uploadId: 923098

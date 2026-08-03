@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 162098ada6c1b3548b9b342c0e65927b
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 7400000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 381836
+  packageName: Wheelchair Animation
+  packageVersion: 1.0
+  assetPath: Assets/Wheelchair Animation/Assets/Animation/Torch/AS_WheelChair_Torch_Check.anim
+  uploadId: 923098

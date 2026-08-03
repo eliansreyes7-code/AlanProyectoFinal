@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: eba5190ec1ee64149bbdd59d22ec2bcd
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 381836
+  packageName: Wheelchair Animation
+  packageVersion: 1.0
+  assetPath: Assets/Wheelchair Animation/Assets/Prefabs/Armature.prefab
+  uploadId: 923098

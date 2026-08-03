@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 4570ecdc12e699d4a875a2c48e850dc9
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 7400000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 381836
+  packageName: Wheelchair Animation
+  packageVersion: 1.0
+  assetPath: Assets/Wheelchair Animation/Assets/Animation/Idle/Sleep/AS_WheelChair_Sleep_Loop.anim
+  uploadId: 923098

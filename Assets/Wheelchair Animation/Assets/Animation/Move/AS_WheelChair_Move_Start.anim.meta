@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: cde638344ddfda044afc6287cbe5c4d2
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 7400000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 381836
+  packageName: Wheelchair Animation
+  packageVersion: 1.0
+  assetPath: Assets/Wheelchair Animation/Assets/Animation/Move/AS_WheelChair_Move_Start.anim
+  uploadId: 923098

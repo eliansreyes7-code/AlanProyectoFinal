@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 6c4fd0491f128004093b6965751cd09b
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 7400000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 381836
+  packageName: Wheelchair Animation
+  packageVersion: 1.0
+  assetPath: Assets/Wheelchair Animation/Assets/Animation/Knife/AS_WheelChair_Combo_Attack.anim
+  uploadId: 923098

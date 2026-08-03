@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 9f34f82b3bd905244888878e024dfd2f
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 7400000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 381836
+  packageName: Wheelchair Animation
+  packageVersion: 1.0
+  assetPath: Assets/Wheelchair Animation/Assets/Animation/Fall/AS_WheelChair_Stairs_Fall.anim
+  uploadId: 923098

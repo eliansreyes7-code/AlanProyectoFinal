@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: d3ab21c7c5f170942876dc3809037b0b
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 7400000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 381836
+  packageName: Wheelchair Animation
+  packageVersion: 1.0
+  assetPath: Assets/Wheelchair Animation/Assets/Animation/Knife/AS_WheelChair_Throw.anim
+  uploadId: 923098

@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 2bf2525b5f43b304282de326a5b74f50
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 7400000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 381836
+  packageName: Wheelchair Animation
+  packageVersion: 1.0
+  assetPath: Assets/Wheelchair Animation/Assets/Animation/AS_Sleep_To_WheelChair.anim
+  uploadId: 923098

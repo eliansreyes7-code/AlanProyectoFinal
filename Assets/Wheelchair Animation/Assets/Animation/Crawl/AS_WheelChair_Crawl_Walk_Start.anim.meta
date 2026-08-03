@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 8485bcfa1dd53334c8acc9806bb2374f
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 7400000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 381836
+  packageName: Wheelchair Animation
+  packageVersion: 1.0
+  assetPath: Assets/Wheelchair Animation/Assets/Animation/Crawl/AS_WheelChair_Crawl_Walk_Start.anim
+  uploadId: 923098
