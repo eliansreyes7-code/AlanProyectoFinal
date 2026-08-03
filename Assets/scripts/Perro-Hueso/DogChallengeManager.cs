@@ -8,6 +8,13 @@ public class DogChallengeManager : MonoBehaviour
     [SerializeField] private DogAI dog;
     [SerializeField] private Transform dogLookTarget;
 
+    [Header("Dog Final Target")]
+    [Tooltip("Lugar hacia donde correrá el perro después de tomar el hueso.")]
+    [SerializeField] private Transform boneThrowTarget;
+
+    [Header("Bone")]
+    [SerializeField] private Bone bone;
+
     [Header("Trigger")]
     [SerializeField] private DogTrigger dogTrigger;
 
@@ -26,7 +33,6 @@ public class DogChallengeManager : MonoBehaviour
 
     [Header("White Flash")]
     [SerializeField] private CanvasGroup whiteFlash;
-
     [SerializeField] private float flashInDuration = 0.25f;
     [SerializeField] private float whiteHoldDuration = 0.35f;
     [SerializeField] private float flashOutDuration = 0.6f;
@@ -34,6 +40,10 @@ public class DogChallengeManager : MonoBehaviour
     [Header("Intro Animation")]
     [SerializeField] private float cameraTurnDuration = 0.7f;
     [SerializeField] private float dogLookDuration = 1.2f;
+
+    [Header("Bone Cinematic")]
+    [SerializeField] private float boneCameraTurnDuration = 0.6f;
+    [SerializeField] private float dogRunWatchTime = 2.5f;
 
     private Transform player;
 
@@ -43,6 +53,8 @@ public class DogChallengeManager : MonoBehaviour
     private bool challengeActive = false;
     private bool dogIsChasing = false;
     private bool restarting = false;
+    private bool challengeCompleted = false;
+
 
     // =====================================================
     // START
@@ -50,10 +62,8 @@ public class DogChallengeManager : MonoBehaviour
 
     private void Start()
     {
-        // El mensaje del perro NO aparece al comenzar.
         HideChallengeText();
 
-        // Destello completamente invisible.
         if (whiteFlash != null)
         {
             whiteFlash.alpha = 0f;
@@ -61,6 +71,7 @@ public class DogChallengeManager : MonoBehaviour
             whiteFlash.blocksRaycasts = false;
         }
     }
+
 
     // =====================================================
     // UPDATE
@@ -74,19 +85,22 @@ public class DogChallengeManager : MonoBehaviour
         if (!dogIsChasing)
             return;
 
-        if (restarting)
+        if (restarting || challengeCompleted)
             return;
 
         CheckIfDogCaughtPlayer();
     }
 
+
     // =====================================================
-    // EMPEZAR RETO
+    // INICIAR RETO
     // =====================================================
 
     public void StartDogChallenge(Transform newPlayer)
     {
-        if (challengeActive || restarting)
+        if (challengeActive ||
+            restarting ||
+            challengeCompleted)
             return;
 
         if (newPlayer == null)
@@ -118,22 +132,20 @@ public class DogChallengeManager : MonoBehaviour
         StartCoroutine(IntroSequence());
     }
 
+
     // =====================================================
     // INTRO
     // =====================================================
 
     private IEnumerator IntroSequence()
     {
-        Debug.Log("DOG CHALLENGE: iniciando.");
-
-        // Detenemos la silla durante la cinemática.
         if (wheelchairController != null)
             wheelchairController.enabled = false;
 
         ShowChallengeText("¡Cuidado!");
 
-        // Mirar al perro + zoom.
-        if (cameraLook != null && dogLookTarget != null)
+        if (cameraLook != null &&
+            dogLookTarget != null)
         {
             yield return StartCoroutine(
                 cameraLook.LookAtTargetWithZoom(
@@ -148,11 +160,9 @@ public class DogChallengeManager : MonoBehaviour
             "¡Escapa! Llega lo más rápido posible al siguiente punto."
         );
 
-        // Devolver movimiento.
         if (wheelchairController != null)
             wheelchairController.enabled = true;
 
-        // Comenzar persecución.
         if (dog != null)
         {
             dog.ChasePlayer(player);
@@ -160,13 +170,129 @@ public class DogChallengeManager : MonoBehaviour
         }
     }
 
+
     // =====================================================
-    // DETECTAR CAPTURA
+    // HUESO - PLAYER CERCA
+    // =====================================================
+
+    public void ShowBonePrompt()
+    {
+        if (!challengeActive ||
+            challengeCompleted)
+            return;
+
+        ShowChallengeText(
+            "Presiona F para tomar el hueso"
+        );
+    }
+
+    public void HideBonePrompt()
+    {
+        if (!challengeActive ||
+            challengeCompleted)
+            return;
+
+        // Si todavía lo persigue el perro,
+        // volvemos a mostrar el mensaje de escape.
+        if (dogIsChasing)
+        {
+            ShowChallengeText(
+                "¡Escapa! Llega lo más rápido posible al siguiente punto."
+            );
+        }
+    }
+
+
+    // =====================================================
+    // HUESO RECOGIDO
+    // =====================================================
+
+    public void BoneTaken()
+    {
+        if (!challengeActive ||
+            challengeCompleted)
+            return;
+
+        StartCoroutine(
+            BoneSequence()
+        );
+    }
+
+    private IEnumerator BoneSequence()
+    {
+        challengeCompleted = true;
+        dogIsChasing = false;
+
+        // Bloqueamos brevemente la silla para que
+        // el jugador pueda ver qué ocurre.
+        if (wheelchairController != null)
+            wheelchairController.enabled = false;
+
+        ShowChallengeText(
+            "Distrajiste al perro"
+        );
+
+        // El perro deja al Player y corre
+        // hacia el punto donde simulamos
+        // que fue lanzado el hueso.
+        if (dog != null &&
+            boneThrowTarget != null)
+        {
+            dog.GoToBone(
+                boneThrowTarget
+            );
+        }
+
+        /*
+         * Miramos al perro.
+         *
+         * DogLookTarget es hijo del perro,
+         * así que se moverá junto con él.
+         * Esto permite seguir visualmente
+         * al perro mientras corre.
+         */
+        if (cameraLook != null &&
+            dogLookTarget != null)
+        {
+            yield return StartCoroutine(
+                cameraLook.LookAtTargetWithZoom(
+                    dogLookTarget,
+                    boneCameraTurnDuration,
+                    dogRunWatchTime
+                )
+            );
+        }
+        else
+        {
+            yield return new WaitForSeconds(
+                dogRunWatchTime
+            );
+        }
+
+        // Terminó el reto.
+        HideChallengeText();
+
+        challengeActive = false;
+
+        // Devolver movimiento.
+        if (wheelchairController != null)
+            wheelchairController.enabled = true;
+
+        /*
+         * Ahora el usuario puede continuar
+         * hacia el siguiente checkpoint.
+         */
+    }
+
+
+    // =====================================================
+    // PERRO ATRAPA AL PLAYER
     // =====================================================
 
     private void CheckIfDogCaughtPlayer()
     {
-        if (dog == null || player == null)
+        if (dog == null ||
+            player == null)
             return;
 
         Vector3 dogPosition =
@@ -192,8 +318,9 @@ public class DogChallengeManager : MonoBehaviour
         }
     }
 
+
     // =====================================================
-    // PERRO ATRAPA AL JUGADOR
+    // REINICIO
     // =====================================================
 
     private IEnumerator RestartChallengeSequence()
@@ -206,11 +333,9 @@ public class DogChallengeManager : MonoBehaviour
         challengeActive = false;
         dogIsChasing = false;
 
-        // Detener perro.
         if (dog != null)
             dog.StopDog();
 
-        // Bloquear jugador.
         if (wheelchairController != null)
             wheelchairController.enabled = false;
 
@@ -221,15 +346,11 @@ public class DogChallengeManager : MonoBehaviour
             "El perro te alcanzó"
         );
 
-        // Pequeña pausa para que se perciba.
         yield return new WaitForSeconds(
             restartDelay
         );
 
-        // ==========================================
-        // DESTELLO BLANCO
-        // ==========================================
-
+        // Pantalla a blanco.
         yield return StartCoroutine(
             FadeWhite(
                 0f,
@@ -238,23 +359,22 @@ public class DogChallengeManager : MonoBehaviour
             )
         );
 
-        /*
-         * En este momento la pantalla está
-         * completamente blanca.
-         *
-         * Aquí hacemos el teletransporte para que
-         * el usuario no vea el cambio de posición.
-         */
-
+        // Teletransportar mientras no se ve.
         TeleportPlayerToRestartPoint();
 
         // Reiniciar perro.
         if (dog != null)
             dog.ResetDog();
 
-        // Permitir que el trigger vuelva a activarse.
+        // Reiniciar hueso.
+        if (bone != null)
+            bone.ResetBone();
+
+        // Reiniciar trigger.
         if (dogTrigger != null)
             dogTrigger.ResetTrigger();
+
+        challengeCompleted = false;
 
         HideChallengeText();
 
@@ -262,10 +382,7 @@ public class DogChallengeManager : MonoBehaviour
             whiteHoldDuration
         );
 
-        // ==========================================
-        // QUITAR DESTELLO
-        // ==========================================
-
+        // Volver del blanco.
         yield return StartCoroutine(
             FadeWhite(
                 1f,
@@ -274,7 +391,6 @@ public class DogChallengeManager : MonoBehaviour
             )
         );
 
-        // Reactivar controles.
         if (wheelchairController != null)
             wheelchairController.enabled = true;
 
@@ -282,19 +398,17 @@ public class DogChallengeManager : MonoBehaviour
             cameraLook.SetLookEnabled(true);
 
         restarting = false;
-
-        Debug.Log(
-            "DOG CHALLENGE: jugador reiniciado."
-        );
     }
 
+
     // =====================================================
-    // TELEPORT PLAYER
+    // TELEPORT
     // =====================================================
 
     private void TeleportPlayerToRestartPoint()
     {
-        if (player == null || restartPoint == null)
+        if (player == null ||
+            restartPoint == null)
             return;
 
         if (playerRigidbody != null)
@@ -321,8 +435,9 @@ public class DogChallengeManager : MonoBehaviour
         }
     }
 
+
     // =====================================================
-    // DESTELLO BLANCO
+    // WHITE FLASH
     // =====================================================
 
     private IEnumerator FadeWhite(
@@ -365,6 +480,7 @@ public class DogChallengeManager : MonoBehaviour
         whiteFlash.alpha = to;
     }
 
+
     // =====================================================
     // UI
     // =====================================================
@@ -386,31 +502,5 @@ public class DogChallengeManager : MonoBehaviour
 
         challengeText.text = "";
         challengeText.gameObject.SetActive(false);
-    }
-
-    // =====================================================
-    // HUESO
-    // =====================================================
-
-    public void BoneThrown(
-        Transform boneTransform)
-    {
-        if (boneTransform == null)
-            return;
-
-        dogIsChasing = false;
-
-        if (dog != null)
-        {
-            dog.GoToBone(
-                boneTransform
-            );
-        }
-
-        ShowChallengeText(
-            "¡Bien! El perro fue distraído."
-        );
-
-        challengeActive = false;
     }
 }
