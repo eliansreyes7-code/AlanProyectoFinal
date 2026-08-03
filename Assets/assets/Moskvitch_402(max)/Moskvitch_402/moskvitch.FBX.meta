@@ -3,7 +3,12 @@ guid: 934163ca513477149af3d4cb71f283bd
 ModelImporter:
   serializedVersion: 24200
   internalIDToNameTable: []
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: moskvitch
+    second: {fileID: 2100000, guid: 5695f5166c8d45b4390552eaf4b6ffad, type: 2}
   materials:
     materialImportMode: 2
     materialName: 0
