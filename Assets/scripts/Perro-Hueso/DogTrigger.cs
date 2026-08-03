@@ -5,9 +5,10 @@ public class DogTrigger : MonoBehaviour
     [SerializeField]
     private DogChallengeManager challengeManager;
 
-    private bool activated;
+    private bool activated = false;
 
-    private void OnTriggerEnter(Collider other)
+    private void OnTriggerEnter(
+        Collider other)
     {
         if (activated)
             return;
@@ -20,6 +21,10 @@ public class DogTrigger : MonoBehaviour
             return;
 
         activated = true;
+
+        Debug.Log(
+            "DOG TRIGGER ACTIVADO."
+        );
 
         challengeManager.StartDogChallenge(
             player.transform

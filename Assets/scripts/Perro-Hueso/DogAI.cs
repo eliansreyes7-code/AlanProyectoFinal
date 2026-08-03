@@ -12,17 +12,12 @@ public class DogAI : MonoBehaviour
 
     [Header("Movement")]
     [SerializeField] private float moveSpeed = 3.5f;
-    [SerializeField] private float stoppingDistance = 1.2f;
-    [SerializeField] private float catchDistance = 1.5f;
+    [SerializeField] private float stoppingDistance = 0.8f;
     [SerializeField] private float rotationSpeed = 8f;
-
-    [Header("Challenge")]
-    [SerializeField] private DogChallengeManager challengeManager;
 
     private Rigidbody rb;
 
     private Transform currentTarget;
-    private Transform player;
 
     private DogState currentState =
         DogState.Idle;
@@ -30,7 +25,7 @@ public class DogAI : MonoBehaviour
     private Vector3 initialPosition;
     private Quaternion initialRotation;
 
-    private bool playerCaught;
+    public Transform DogTransform => transform;
 
     private void Awake()
     {
@@ -62,29 +57,16 @@ public class DogAI : MonoBehaviour
         if (currentTarget == null)
             return;
 
-        if (currentState == DogState.ChasingPlayer)
-        {
-            CheckPlayerCatch();
-
-            if (playerCaught)
-                return;
-        }
-
         FollowTarget();
     }
-
-    // =====================================================
-    // MOVIMIENTO
-    // =====================================================
 
     private void FollowTarget()
     {
         Vector3 targetPosition =
-            new Vector3(
-                currentTarget.position.x,
-                rb.position.y,
-                currentTarget.position.z
-            );
+            currentTarget.position;
+
+        targetPosition.y =
+            rb.position.y;
 
         Vector3 direction =
             targetPosition - rb.position;
@@ -97,13 +79,13 @@ public class DogAI : MonoBehaviour
 
         direction.Normalize();
 
-        Vector3 nextPosition =
+        Vector3 newPosition =
             rb.position +
             direction *
             moveSpeed *
             Time.fixedDeltaTime;
 
-        rb.MovePosition(nextPosition);
+        rb.MovePosition(newPosition);
 
         Quaternion targetRotation =
             Quaternion.LookRotation(
@@ -111,71 +93,30 @@ public class DogAI : MonoBehaviour
                 Vector3.up
             );
 
-        Quaternion smoothRotation =
+        rb.MoveRotation(
             Quaternion.Slerp(
                 rb.rotation,
                 targetRotation,
                 rotationSpeed *
                 Time.fixedDeltaTime
-            );
-
-        rb.MoveRotation(smoothRotation);
+            )
+        );
     }
 
-    // =====================================================
-    // ATRAPAR PLAYER
-    // =====================================================
-
-    private void CheckPlayerCatch()
+    public void ChasePlayer(
+        Transform player)
     {
-        if (player == null || playerCaught)
+        if (player == null)
             return;
 
-        Vector3 dogPosition = transform.position;
-        Vector3 playerPosition = player.position;
-
-        dogPosition.y = 0f;
-        playerPosition.y = 0f;
-
-        float distance =
-            Vector3.Distance(
-                dogPosition,
-                playerPosition
-            );
-
-        if (distance <= catchDistance)
-        {
-            playerCaught = true;
-
-            currentState = DogState.Idle;
-            currentTarget = null;
-
-            if (challengeManager != null)
-            {
-                challengeManager.PlayerCaught();
-            }
-        }
-    }
-
-    // =====================================================
-    // ESTADOS
-    // =====================================================
-
-    public void ChasePlayer(Transform target)
-    {
-        if (target == null)
-            return;
-
-        player = target;
-        currentTarget = target;
-
-        playerCaught = false;
+        currentTarget = player;
 
         currentState =
             DogState.ChasingPlayer;
     }
 
-    public void GoToBone(Transform bone)
+    public void GoToBone(
+        Transform bone)
     {
         if (bone == null)
             return;
@@ -194,24 +135,20 @@ public class DogAI : MonoBehaviour
             DogState.Idle;
     }
 
-    // =====================================================
-    // REINICIAR
-    // =====================================================
-
     public void ResetDog()
     {
-        playerCaught = false;
+        StopDog();
 
-        currentTarget = null;
-        player = null;
+        rb.linearVelocity =
+            Vector3.zero;
 
-        currentState =
-            DogState.Idle;
+        rb.angularVelocity =
+            Vector3.zero;
 
-        rb.position = initialPosition;
-        rb.rotation = initialRotation;
+        rb.position =
+            initialPosition;
 
-        rb.linearVelocity = Vector3.zero;
-        rb.angularVelocity = Vector3.zero;
+        rb.rotation =
+            initialRotation;
     }
 }

@@ -11,8 +11,12 @@ public class DogChallengeManager : MonoBehaviour
     [Header("Trigger")]
     [SerializeField] private DogTrigger dogTrigger;
 
-    [Header("Player")]
+    [Header("Restart")]
     [SerializeField] private Transform restartPoint;
+    [SerializeField] private float restartDelay = 0.4f;
+
+    [Header("Catch")]
+    [SerializeField] private float catchDistance = 1.5f;
 
     [Header("Camera")]
     [SerializeField] private WheelchairCameraLook cameraLook;
@@ -20,30 +24,69 @@ public class DogChallengeManager : MonoBehaviour
     [Header("UI")]
     [SerializeField] private TMP_Text challengeText;
 
-    [Header("Intro")]
-    [SerializeField] private float cameraTurnDuration = 0.6f;
-    [SerializeField] private float dogLookTime = 0.8f;
+    [Header("White Flash")]
+    [SerializeField] private CanvasGroup whiteFlash;
 
-    [Header("Restart")]
-    [SerializeField] private float restartDelay = 1.2f;
+    [SerializeField] private float flashInDuration = 0.25f;
+    [SerializeField] private float whiteHoldDuration = 0.35f;
+    [SerializeField] private float flashOutDuration = 0.6f;
+
+    [Header("Intro Animation")]
+    [SerializeField] private float cameraTurnDuration = 0.7f;
+    [SerializeField] private float dogLookDuration = 1.2f;
 
     private Transform player;
 
     private WheelchairController wheelchairController;
     private Rigidbody playerRigidbody;
 
-    private bool challengeActive;
-    private bool restarting;
+    private bool challengeActive = false;
+    private bool dogIsChasing = false;
+    private bool restarting = false;
 
     // =====================================================
-    // INICIAR RETO
+    // START
     // =====================================================
 
-    public void StartDogChallenge(
-        Transform newPlayer)
+    private void Start()
     {
-        if (challengeActive ||
-            restarting)
+        // El mensaje del perro NO aparece al comenzar.
+        HideChallengeText();
+
+        // Destello completamente invisible.
+        if (whiteFlash != null)
+        {
+            whiteFlash.alpha = 0f;
+            whiteFlash.interactable = false;
+            whiteFlash.blocksRaycasts = false;
+        }
+    }
+
+    // =====================================================
+    // UPDATE
+    // =====================================================
+
+    private void Update()
+    {
+        if (!challengeActive)
+            return;
+
+        if (!dogIsChasing)
+            return;
+
+        if (restarting)
+            return;
+
+        CheckIfDogCaughtPlayer();
+    }
+
+    // =====================================================
+    // EMPEZAR RETO
+    // =====================================================
+
+    public void StartDogChallenge(Transform newPlayer)
+    {
+        if (challengeActive || restarting)
             return;
 
         if (newPlayer == null)
@@ -52,14 +95,12 @@ public class DogChallengeManager : MonoBehaviour
         player = newPlayer;
 
         wheelchairController =
-            player.GetComponent
-            <WheelchairController>();
+            player.GetComponent<WheelchairController>();
 
         if (wheelchairController == null)
         {
             wheelchairController =
-                player.GetComponentInParent
-                <WheelchairController>();
+                player.GetComponentInParent<WheelchairController>();
         }
 
         playerRigidbody =
@@ -68,149 +109,283 @@ public class DogChallengeManager : MonoBehaviour
         if (playerRigidbody == null)
         {
             playerRigidbody =
-                player.GetComponentInParent
-                <Rigidbody>();
+                player.GetComponentInParent<Rigidbody>();
         }
 
         challengeActive = true;
+        dogIsChasing = false;
 
-        StartCoroutine(
-            StartChallengeSequence()
-        );
+        StartCoroutine(IntroSequence());
     }
 
     // =====================================================
     // INTRO
     // =====================================================
 
-    private IEnumerator StartChallengeSequence()
+    private IEnumerator IntroSequence()
     {
-        // Bloqueamos brevemente la silla.
+        Debug.Log("DOG CHALLENGE: iniciando.");
+
+        // Detenemos la silla durante la cinemática.
         if (wheelchairController != null)
             wheelchairController.enabled = false;
 
-        if (challengeText != null)
-        {
-            challengeText.text =
-                "¡Cuidado!";
-        }
+        ShowChallengeText("¡Cuidado!");
 
-        // Cámara gira + zoom.
-        if (cameraLook != null &&
-            dogLookTarget != null)
+        // Mirar al perro + zoom.
+        if (cameraLook != null && dogLookTarget != null)
         {
-            cameraLook.LookAtTargetWithZoom(
-                dogLookTarget,
-                cameraTurnDuration,
-                dogLookTime
-            );
-
-            yield return new WaitForSeconds(
-                (cameraTurnDuration * 2f) +
-                dogLookTime
+            yield return StartCoroutine(
+                cameraLook.LookAtTargetWithZoom(
+                    dogLookTarget,
+                    cameraTurnDuration,
+                    dogLookDuration
+                )
             );
         }
 
-        // Devolvemos movimiento.
+        ShowChallengeText(
+            "¡Escapa! Llega lo más rápido posible al siguiente punto."
+        );
+
+        // Devolver movimiento.
         if (wheelchairController != null)
             wheelchairController.enabled = true;
 
-        if (challengeText != null)
-        {
-            challengeText.text =
-                "¡Escapa! Llega al siguiente punto.";
-        }
-
+        // Comenzar persecución.
         if (dog != null)
         {
             dog.ChasePlayer(player);
+            dogIsChasing = true;
         }
     }
 
     // =====================================================
-    // PERRO ATRAPA AL PLAYER
+    // DETECTAR CAPTURA
     // =====================================================
 
-    public void PlayerCaught()
+    private void CheckIfDogCaughtPlayer()
     {
-        if (!challengeActive ||
-            restarting)
+        if (dog == null || player == null)
             return;
 
-        StartCoroutine(
-            PlayerCaughtSequence()
-        );
+        Vector3 dogPosition =
+            dog.transform.position;
+
+        Vector3 playerPosition =
+            player.position;
+
+        dogPosition.y = 0f;
+        playerPosition.y = 0f;
+
+        float distance =
+            Vector3.Distance(
+                dogPosition,
+                playerPosition
+            );
+
+        if (distance <= catchDistance)
+        {
+            StartCoroutine(
+                RestartChallengeSequence()
+            );
+        }
     }
 
-    private IEnumerator PlayerCaughtSequence()
+    // =====================================================
+    // PERRO ATRAPA AL JUGADOR
+    // =====================================================
+
+    private IEnumerator RestartChallengeSequence()
     {
+        if (restarting)
+            yield break;
+
         restarting = true;
+
         challengeActive = false;
+        dogIsChasing = false;
 
-        // Detener silla.
-        if (wheelchairController != null)
-            wheelchairController.enabled = false;
-
+        // Detener perro.
         if (dog != null)
             dog.StopDog();
 
-        if (challengeText != null)
-        {
-            challengeText.text =
-                "El perro te alcanzó.";
-        }
+        // Bloquear jugador.
+        if (wheelchairController != null)
+            wheelchairController.enabled = false;
 
+        if (cameraLook != null)
+            cameraLook.SetLookEnabled(false);
+
+        ShowChallengeText(
+            "El perro te alcanzó"
+        );
+
+        // Pequeña pausa para que se perciba.
         yield return new WaitForSeconds(
             restartDelay
         );
 
-        // =================================================
-        // REAPARECER
-        // =================================================
+        // ==========================================
+        // DESTELLO BLANCO
+        // ==========================================
 
-        if (restartPoint != null &&
-            player != null)
-        {
-            if (playerRigidbody != null)
-            {
-                playerRigidbody.linearVelocity =
-                    Vector3.zero;
+        yield return StartCoroutine(
+            FadeWhite(
+                0f,
+                1f,
+                flashInDuration
+            )
+        );
 
-                playerRigidbody.angularVelocity =
-                    Vector3.zero;
+        /*
+         * En este momento la pantalla está
+         * completamente blanca.
+         *
+         * Aquí hacemos el teletransporte para que
+         * el usuario no vea el cambio de posición.
+         */
 
-                playerRigidbody.position =
-                    restartPoint.position;
-
-                playerRigidbody.rotation =
-                    restartPoint.rotation;
-            }
-            else
-            {
-                player.position =
-                    restartPoint.position;
-
-                player.rotation =
-                    restartPoint.rotation;
-            }
-        }
+        TeleportPlayerToRestartPoint();
 
         // Reiniciar perro.
         if (dog != null)
             dog.ResetDog();
 
-        // Permitir que el trigger vuelva a funcionar.
+        // Permitir que el trigger vuelva a activarse.
         if (dogTrigger != null)
             dogTrigger.ResetTrigger();
 
-        if (challengeText != null)
-            challengeText.text = "";
+        HideChallengeText();
 
-        // Reactivar jugador.
+        yield return new WaitForSeconds(
+            whiteHoldDuration
+        );
+
+        // ==========================================
+        // QUITAR DESTELLO
+        // ==========================================
+
+        yield return StartCoroutine(
+            FadeWhite(
+                1f,
+                0f,
+                flashOutDuration
+            )
+        );
+
+        // Reactivar controles.
         if (wheelchairController != null)
             wheelchairController.enabled = true;
 
+        if (cameraLook != null)
+            cameraLook.SetLookEnabled(true);
+
         restarting = false;
+
+        Debug.Log(
+            "DOG CHALLENGE: jugador reiniciado."
+        );
+    }
+
+    // =====================================================
+    // TELEPORT PLAYER
+    // =====================================================
+
+    private void TeleportPlayerToRestartPoint()
+    {
+        if (player == null || restartPoint == null)
+            return;
+
+        if (playerRigidbody != null)
+        {
+            playerRigidbody.linearVelocity =
+                Vector3.zero;
+
+            playerRigidbody.angularVelocity =
+                Vector3.zero;
+
+            playerRigidbody.position =
+                restartPoint.position;
+
+            playerRigidbody.rotation =
+                restartPoint.rotation;
+        }
+        else
+        {
+            player.position =
+                restartPoint.position;
+
+            player.rotation =
+                restartPoint.rotation;
+        }
+    }
+
+    // =====================================================
+    // DESTELLO BLANCO
+    // =====================================================
+
+    private IEnumerator FadeWhite(
+        float from,
+        float to,
+        float duration)
+    {
+        if (whiteFlash == null)
+            yield break;
+
+        float timer = 0f;
+
+        whiteFlash.alpha = from;
+
+        while (timer < duration)
+        {
+            timer += Time.deltaTime;
+
+            float t =
+                Mathf.Clamp01(
+                    timer / duration
+                );
+
+            t = Mathf.SmoothStep(
+                0f,
+                1f,
+                t
+            );
+
+            whiteFlash.alpha =
+                Mathf.Lerp(
+                    from,
+                    to,
+                    t
+                );
+
+            yield return null;
+        }
+
+        whiteFlash.alpha = to;
+    }
+
+    // =====================================================
+    // UI
+    // =====================================================
+
+    private void ShowChallengeText(
+        string message)
+    {
+        if (challengeText == null)
+            return;
+
+        challengeText.gameObject.SetActive(true);
+        challengeText.text = message;
+    }
+
+    private void HideChallengeText()
+    {
+        if (challengeText == null)
+            return;
+
+        challengeText.text = "";
+        challengeText.gameObject.SetActive(false);
     }
 
     // =====================================================
@@ -223,6 +398,8 @@ public class DogChallengeManager : MonoBehaviour
         if (boneTransform == null)
             return;
 
+        dogIsChasing = false;
+
         if (dog != null)
         {
             dog.GoToBone(
@@ -230,11 +407,9 @@ public class DogChallengeManager : MonoBehaviour
             );
         }
 
-        if (challengeText != null)
-        {
-            challengeText.text =
-                "¡Bien! El perro fue distraído.";
-        }
+        ShowChallengeText(
+            "¡Bien! El perro fue distraído."
+        );
 
         challengeActive = false;
     }
