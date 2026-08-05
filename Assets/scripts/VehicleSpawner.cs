@@ -4,8 +4,9 @@ using UnityEngine;
 
 public class VehicleSpawner : MonoBehaviour
 {
-    [Header("Vehicle")]
-    [SerializeField] private GameObject vehiclePrefab;
+    [Header("Vehicles")]
+    [Tooltip("Prefabs de vehículos que pueden aparecer aleatoriamente.")]
+    [SerializeField] private GameObject[] vehiclePrefabs;
 
     [Header("Traffic System")]
     [SerializeField] private TrafficLightController trafficLight;
@@ -40,40 +41,84 @@ public class VehicleSpawner : MonoBehaviour
 
     private bool ValidateConfiguration()
     {
-        if (vehiclePrefab == null)
+        if (vehiclePrefabs == null || vehiclePrefabs.Length == 0)
         {
-            Debug.LogError("VehicleSpawner: falta Vehicle Prefab.");
+            Debug.LogError(
+                "VehicleSpawner: no hay prefabs de vehículos asignados.",
+                this
+            );
+
             return false;
+        }
+
+        for (int i = 0; i < vehiclePrefabs.Length; i++)
+        {
+            if (vehiclePrefabs[i] == null)
+            {
+                Debug.LogError(
+                    "VehicleSpawner: el elemento " + i +
+                    " de Vehicle Prefabs está vacío.",
+                    this
+                );
+
+                return false;
+            }
+
+            if (vehiclePrefabs[i].GetComponent<VehicleController>() == null)
+            {
+                Debug.LogError(
+                    "VehicleSpawner: el prefab " +
+                    vehiclePrefabs[i].name +
+                    " no tiene VehicleController en el objeto raíz.",
+                    vehiclePrefabs[i]
+                );
+
+                return false;
+            }
         }
 
         if (trafficLight == null)
         {
-            Debug.LogError("VehicleSpawner: falta Traffic Light.");
+            Debug.LogError("VehicleSpawner: falta Traffic Light.", this);
             return false;
         }
 
         if (stopPoint == null)
         {
-            Debug.LogError("VehicleSpawner: falta Stop Point.");
+            Debug.LogError("VehicleSpawner: falta Stop Point.", this);
             return false;
         }
 
         if (trafficExitPoint == null)
         {
-            Debug.LogError("VehicleSpawner: falta Traffic Exit Point.");
+            Debug.LogError("VehicleSpawner: falta Traffic Exit Point.", this);
             return false;
         }
 
         if (spawnPoint == null)
         {
-            Debug.LogError("VehicleSpawner: falta Spawn Point.");
+            Debug.LogError("VehicleSpawner: falta Spawn Point.", this);
             return false;
         }
 
         if (route == null || route.Length == 0)
         {
-            Debug.LogError("VehicleSpawner: la ruta está vacía.");
+            Debug.LogError("VehicleSpawner: la ruta está vacía.", this);
             return false;
+        }
+
+        for (int i = 0; i < route.Length; i++)
+        {
+            if (route[i] == null)
+            {
+                Debug.LogError(
+                    "VehicleSpawner: el punto " + i +
+                    " de la ruta está vacío.",
+                    this
+                );
+
+                return false;
+            }
         }
 
         return true;
@@ -103,8 +148,11 @@ public class VehicleSpawner : MonoBehaviour
         if (!CanSpawn())
             return;
 
+        int randomIndex = Random.Range(0, vehiclePrefabs.Length);
+        GameObject selectedPrefab = vehiclePrefabs[randomIndex];
+
         GameObject vehicle = Instantiate(
-            vehiclePrefab,
+            selectedPrefab,
             spawnPoint.position,
             spawnPoint.rotation
         );
@@ -115,7 +163,9 @@ public class VehicleSpawner : MonoBehaviour
         if (controller == null)
         {
             Debug.LogError(
-                "VehicleSpawner: el prefab no tiene VehicleController."
+                "VehicleSpawner: el vehículo generado no tiene " +
+                "VehicleController en el objeto raíz.",
+                vehicle
             );
 
             Destroy(vehicle);
