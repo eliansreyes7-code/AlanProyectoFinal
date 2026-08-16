@@ -13,6 +13,8 @@ GameObject:
   - component: {fileID: 7463615851060295689}
   - component: {fileID: 8684217387902351883}
   - component: {fileID: 5285836560946857290}
+  - component: {fileID: -8390954903202624781}
+  - component: {fileID: 4071652789592696538}
   m_Layer: 0
   m_Name: Car_01
   m_TagString: Untagged
@@ -29,7 +31,7 @@ Transform:
   m_GameObject: {fileID: 5169196928808439734}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 2.705, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -108,12 +110,12 @@ BoxCollider:
     serializedVersion: 2
     m_Bits: 0
   m_LayerOverridePriority: 0
-  m_IsTrigger: 1
+  m_IsTrigger: 0
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 1, y: 1, z: 1}
-  m_Center: {x: 0, y: 0, z: 0}
+  m_Size: {x: 1.7, y: 1.74, z: 4.1}
+  m_Center: {x: 0, y: -0.77, z: 0}
 --- !u!114 &5285836560946857290
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -126,21 +128,69 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 724d746e1e44e48bab873c3b3a162505, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::VehicleController
-  waypoints:
-  - {fileID: 0}
-  - {fileID: 0}
+  destinationPoint: {fileID: 0}
+  destinationDistance: 2
   maxSpeed: 6
   acceleration: 4
   braking: 8
-  waypointDistance: 1
-  rotationSpeed: 5
   trafficLight: {fileID: 0}
   stopPoint: {fileID: 0}
   trafficExitPoint: {fileID: 0}
   trafficDetectionDistance: 12
   stopDistance: 1.25
-  exitPointDistance: 2
+  safetySensorPoint: {fileID: 0}
+  safetyLength: 7
+  safetyWidth: 2
+  safetyHeight: 1.5
+  laneTolerance: 1.5
+  showSafetyZone: 1
   destroyAtEnd: 1
+--- !u!114 &-8390954903202624781
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5169196928808439734}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 205223f7fa96a4d068d2945b4ac7f2d4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::VehiclePlayerHit
+  hitBehaviour: 0
+  respawnPoint: {fileID: 0}
+  sceneToLoad: office
+  whiteFlash: {fileID: 0}
+  flashInDuration: 0.15
+  whiteHoldDuration: 0.25
+  flashOutDuration: 0.5
+--- !u!54 &4071652789592696538
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5169196928808439734}
+  serializedVersion: 5
+  m_Mass: 1
+  m_LinearDamping: 0
+  m_AngularDamping: 0.05
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 1
+  m_IsKinematic: 0
+  m_Interpolate: 0
+  m_Constraints: 36
+  m_CollisionDetection: 0
 --- !u!1001 &2136252449989958280
 PrefabInstance:
   m_ObjectHideFlags: 0

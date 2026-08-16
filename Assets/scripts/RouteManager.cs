@@ -2,67 +2,137 @@ using UnityEngine;
 
 public class RouteManager : MonoBehaviour
 {
-    [Header("Route")]
-    [SerializeField] private Checkpoint[] checkpoints;
+    // =====================================================
+    // CHECKPOINTS
+    // =====================================================
+
+    [Header("Checkpoints")]
+    [SerializeField] private Checkpoint checkpoint1;
+    [SerializeField] private Checkpoint checkpoint2;
+    [SerializeField] private Checkpoint finalRoadCheckpoint;
+
+    // =====================================================
+    // DOG CHALLENGE
+    // =====================================================
+
+    [Header("Dog Challenge")]
+    [SerializeField] private DogChallengeManager dogChallengeManager;
+
+    // =====================================================
+    // PLAYER
+    // =====================================================
 
     [Header("Player")]
     [SerializeField] private Transform player;
 
+    // =====================================================
+    // ROUTE LINE
+    // =====================================================
+
     [Header("Route Line")]
     [SerializeField] private LineRenderer routeLine;
 
-    // Altura fija de la guía sobre el suelo.
-    // Si el suelo está en Y = 0, 0.03 la deja apenas por encima.
     [SerializeField] private float routeGroundHeight = 0.03f;
+
+    // =====================================================
+    // PULSE
+    // =====================================================
 
     [Header("Route Pulse")]
     [SerializeField] private float pulseSpeed = 2f;
 
-    // Transparencia mínima.
     [Range(0f, 1f)]
     [SerializeField] private float minAlpha = 0.08f;
 
-    // Transparencia máxima.
     [Range(0f, 1f)]
     [SerializeField] private float maxAlpha = 0.30f;
 
+    // =====================================================
+    // VARIABLES
+    // =====================================================
+
+    private Checkpoint[] checkpoints;
+
     private int currentCheckpointIndex = 0;
 
+    private bool routePaused = false;
+    private bool waitingForBone = false;
+    private bool routeCompleted = false;
+
     private Material routeMaterial;
+
+    // =====================================================
+    // CURRENT CHECKPOINT
+    // =====================================================
 
     public Checkpoint CurrentCheckpoint
     {
         get
         {
-            if (checkpoints == null || checkpoints.Length == 0)
+            if (checkpoints == null ||
+                checkpoints.Length == 0)
+            {
                 return null;
+            }
 
             if (currentCheckpointIndex < 0 ||
                 currentCheckpointIndex >= checkpoints.Length)
+            {
                 return null;
+            }
 
             return checkpoints[currentCheckpointIndex];
         }
     }
 
+    // =====================================================
+    // START
+    // =====================================================
+
     private void Start()
     {
-        // -----------------------------
-        // Verificar checkpoints
-        // -----------------------------
-
-        if (checkpoints == null || checkpoints.Length == 0)
+        // Crear internamente la ruta exacta.
+        checkpoints = new Checkpoint[]
         {
-            Debug.LogWarning(
-                "RouteManager no tiene checkpoints asignados."
+            checkpoint1,
+            checkpoint2,
+            finalRoadCheckpoint
+        };
+
+        // =================================================
+        // VALIDAR
+        // =================================================
+
+        if (checkpoint1 == null)
+        {
+            Debug.LogError(
+                "RouteManager: falta Checkpoint 1."
             );
 
             return;
         }
 
-        // -----------------------------
-        // Buscar jugador automáticamente
-        // -----------------------------
+        if (checkpoint2 == null)
+        {
+            Debug.LogError(
+                "RouteManager: falta Checkpoint 2."
+            );
+
+            return;
+        }
+
+        if (finalRoadCheckpoint == null)
+        {
+            Debug.LogError(
+                "RouteManager: falta Final Road Checkpoint."
+            );
+
+            return;
+        }
+
+        // =================================================
+        // PLAYER
+        // =================================================
 
         if (player == null)
         {
@@ -76,58 +146,103 @@ public class RouteManager : MonoBehaviour
             else
             {
                 Debug.LogError(
-                    "RouteManager no encontró al jugador."
+                    "RouteManager: no encontró al jugador."
                 );
             }
         }
 
-        // -----------------------------
-        // Preparar Line Renderer
-        // -----------------------------
+        // =================================================
+        // DOG MANAGER
+        // =================================================
+
+        if (dogChallengeManager == null)
+        {
+            dogChallengeManager =
+                FindFirstObjectByType<DogChallengeManager>();
+        }
+
+        if (dogChallengeManager == null)
+        {
+            Debug.LogWarning(
+                "RouteManager: no encontró DogChallengeManager."
+            );
+        }
+
+        // =================================================
+        // ROUTE LINE
+        // =================================================
 
         if (routeLine != null)
         {
-            /*
-             * .material crea una instancia del material.
-             * Así podemos modificar su transparencia sin
-             * cambiar el material original del proyecto.
-             */
-            routeMaterial = routeLine.material;
+            routeMaterial =
+                routeLine.material;
 
             routeLine.enabled = true;
         }
         else
         {
             Debug.LogWarning(
-                "RouteManager: Route Line no está asignado."
+                "RouteManager: falta Route Line."
             );
         }
 
-        // -----------------------------
-        // Inicializar checkpoints
-        // -----------------------------
+        // =================================================
+        // INICIALIZAR CHECKPOINTS
+        // =================================================
 
-        for (int i = 0; i < checkpoints.Length; i++)
+        for (int i = 0;
+             i < checkpoints.Length;
+             i++)
         {
-            if (checkpoints[i] != null)
-            {
-                checkpoints[i].Initialize(this, i);
-            }
+            if (checkpoints[i] == null)
+                continue;
+
+            checkpoints[i].Initialize(
+                this,
+                i
+            );
+
+            checkpoints[i]
+                .SetCheckpointActive(false);
         }
 
+        // =================================================
+        // EMPEZAR
+        // =================================================
+
         currentCheckpointIndex = 0;
+
+        routePaused = false;
+        waitingForBone = false;
+        routeCompleted = false;
 
         ActivateCurrentCheckpoint();
     }
 
+    // =====================================================
+    // UPDATE
+    // =====================================================
+
     private void Update()
     {
+        if (routeCompleted)
+        {
+            HideRouteLine();
+            return;
+        }
+
+        if (routePaused)
+        {
+            HideRouteLine();
+            return;
+        }
+
         UpdateRouteLine();
         UpdateRoutePulse();
     }
 
     // =====================================================
-    // CHECKPOINTS
+    // ACTIVAR CHECKPOINT
     // =====================================================
 
     private void ActivateCurrentCheckpoint()
@@ -135,37 +250,204 @@ public class RouteManager : MonoBehaviour
         if (CurrentCheckpoint == null)
             return;
 
-        CurrentCheckpoint.SetCheckpointActive(true);
+        CurrentCheckpoint
+            .SetCheckpointActive(true);
+
+        if (routeLine != null)
+        {
+            routeLine.enabled = true;
+        }
+
+        Debug.Log(
+            "RouteManager: checkpoint activo = " +
+            currentCheckpointIndex
+        );
     }
 
-    public void ReachCheckpoint(int index)
+    // =====================================================
+    // REACH CHECKPOINT
+    // =====================================================
+
+    public void ReachCheckpoint(
+        int index)
     {
-        // Solo aceptar el checkpoint que corresponde.
+        if (routeCompleted)
+            return;
+
         if (index != currentCheckpointIndex)
             return;
 
         if (CurrentCheckpoint == null)
             return;
 
-        // Ocultar checkpoint completado.
-        CurrentCheckpoint.SetCheckpointActive(false);
+        // Ocultarlo.
+        CurrentCheckpoint
+            .SetCheckpointActive(false);
 
-        // Pasar al siguiente.
-        currentCheckpointIndex++;
+        // =================================================
+        // CHECKPOINT 1
+        // =================================================
 
-        // ¿Terminamos la ruta?
-        if (currentCheckpointIndex >= checkpoints.Length)
+        if (currentCheckpointIndex == 0)
         {
-            CompleteRoute();
+            currentCheckpointIndex = 1;
+
+            ActivateCurrentCheckpoint();
+
+            Debug.Log(
+                "Checkpoint 1 completado -> Checkpoint 2."
+            );
+
             return;
         }
 
-        // Activar próximo checkpoint.
-        ActivateCurrentCheckpoint();
+        // =================================================
+        // CHECKPOINT 2
+        // =================================================
+
+        if (currentCheckpointIndex == 1)
+        {
+            /*
+             * Dejamos preparado internamente
+             * FinalRoadCheckpoint.
+             *
+             * Pero NO lo mostramos todavía.
+             */
+
+            currentCheckpointIndex = 2;
+
+            routePaused = true;
+            waitingForBone = true;
+
+            HideRouteLine();
+
+            // =============================================
+            // MENSAJE DEL PERRO
+            // =============================================
+
+            if (dogChallengeManager != null)
+            {
+                dogChallengeManager
+                    .ShowDistractDogMessage();
+            }
+
+            Debug.Log(
+                "Checkpoint 2 completado -> " +
+                "distrae al perro."
+            );
+
+            return;
+        }
+
+        // =================================================
+        // FINAL ROAD CHECKPOINT
+        // =================================================
+
+        if (currentCheckpointIndex == 2)
+        {
+            CompleteRoute();
+
+            return;
+        }
     }
 
     // =====================================================
-    // GUÍA VISUAL
+    // EL HUESO YA FUE USADO
+    // =====================================================
+
+    public void BoneWasThrown()
+    {
+        if (!waitingForBone)
+            return;
+
+        waitingForBone = false;
+        routePaused = false;
+
+        /*
+         * currentCheckpointIndex ya vale 2.
+         *
+         * Activamos:
+         * FinalRoadCheckpoint.
+         */
+
+        ActivateCurrentCheckpoint();
+
+        if (dogChallengeManager != null)
+        {
+            dogChallengeManager
+                .ShowGoToFinalPointMessage();
+        }
+
+        Debug.Log(
+            "Hueso completado -> " +
+            "FinalRoadCheckpoint ACTIVADO."
+        );
+    }
+
+    // =====================================================
+    // REINICIAR RUTA POR ATROPELLO
+    // =====================================================
+
+    public void ResetRouteToStart()
+    {
+        /*
+         * Ocultar absolutamente todos los checkpoints.
+         */
+
+        if (checkpoint1 != null)
+        {
+            checkpoint1
+                .SetCheckpointActive(false);
+        }
+
+        if (checkpoint2 != null)
+        {
+            checkpoint2
+                .SetCheckpointActive(false);
+        }
+
+        if (finalRoadCheckpoint != null)
+        {
+            finalRoadCheckpoint
+                .SetCheckpointActive(false);
+        }
+
+        // =================================================
+        // REINICIAR ESTADOS
+        // =================================================
+
+        currentCheckpointIndex = 0;
+
+        routePaused = false;
+        waitingForBone = false;
+        routeCompleted = false;
+
+        // =================================================
+        // VOLVER AL CHECKPOINT 1
+        // =================================================
+
+        if (checkpoint1 != null)
+        {
+            checkpoint1
+                .SetCheckpointActive(true);
+        }
+
+        // =================================================
+        // VOLVER A MOSTRAR LA GUÍA
+        // =================================================
+
+        if (routeLine != null)
+        {
+            routeLine.enabled = true;
+        }
+
+        Debug.Log(
+            "RouteManager: ruta reiniciada -> Checkpoint 1."
+        );
+    }
+
+    // =====================================================
+    // ROUTE LINE
     // =====================================================
 
     private void UpdateRouteLine()
@@ -173,7 +455,23 @@ public class RouteManager : MonoBehaviour
         if (routeLine == null)
             return;
 
-        if (player == null || CurrentCheckpoint == null)
+        if (player == null ||
+            CurrentCheckpoint == null)
+        {
+            routeLine.enabled = false;
+            return;
+        }
+
+        if (routePaused)
+        {
+            routeLine.enabled = false;
+            return;
+        }
+
+        Transform target =
+            CurrentCheckpoint.TargetTransform;
+
+        if (target == null)
         {
             routeLine.enabled = false;
             return;
@@ -181,30 +479,19 @@ public class RouteManager : MonoBehaviour
 
         routeLine.enabled = true;
 
-        /*
-         * Por ahora utilizamos dos puntos:
-         *
-         * Player -------- Checkpoint
-         *
-         * Más adelante podemos agregar RoutePoints
-         * para trazar curvas y seguir las calles.
-         */
         routeLine.positionCount = 2;
 
-        Vector3 startPosition = player.position;
+        Vector3 startPosition =
+            player.position;
 
         Vector3 endPosition =
-            CurrentCheckpoint.TargetTransform.position;
+            target.position;
 
-        /*
-         * IMPORTANTE:
-         *
-         * No utilizamos la altura del centro del Player.
-         * Ambos extremos se colocan prácticamente
-         * sobre el suelo.
-         */
-        startPosition.y = routeGroundHeight;
-        endPosition.y = routeGroundHeight;
+        startPosition.y =
+            routeGroundHeight;
+
+        endPosition.y =
+            routeGroundHeight;
 
         routeLine.SetPosition(
             0,
@@ -218,7 +505,7 @@ public class RouteManager : MonoBehaviour
     }
 
     // =====================================================
-    // EFECTO PULSANTE
+    // PULSE
     // =====================================================
 
     private void UpdateRoutePulse()
@@ -226,19 +513,16 @@ public class RouteManager : MonoBehaviour
         if (routeMaterial == null)
             return;
 
-        /*
-         * Mathf.Sin genera un movimiento entre -1 y 1.
-         *
-         * Lo transformamos a un rango entre 0 y 1.
-         */
         float pulse =
-            (Mathf.Sin(Time.time * pulseSpeed) + 1f)
+            (
+                Mathf.Sin(
+                    Time.time *
+                    pulseSpeed
+                )
+                + 1f
+            )
             * 0.5f;
 
-        /*
-         * Luego convertimos ese valor al rango
-         * de transparencia elegido.
-         */
         float alpha =
             Mathf.Lerp(
                 minAlpha,
@@ -246,24 +530,46 @@ public class RouteManager : MonoBehaviour
                 pulse
             );
 
-        Color color = routeMaterial.color;
+        Color color =
+            routeMaterial.color;
 
         color.a = alpha;
 
-        routeMaterial.color = color;
+        routeMaterial.color =
+            color;
     }
 
     // =====================================================
-    // FINAL DE RUTA
+    // HIDE LINE
     // =====================================================
 
-    private void CompleteRoute()
+    private void HideRouteLine()
     {
         if (routeLine != null)
         {
             routeLine.enabled = false;
         }
+    }
 
-        Debug.Log("Ruta completada.");
+    // =====================================================
+    // COMPLETE
+    // =====================================================
+
+    private void CompleteRoute()
+    {
+        routeCompleted = true;
+        routePaused = true;
+
+        if (finalRoadCheckpoint != null)
+        {
+            finalRoadCheckpoint
+                .SetCheckpointActive(false);
+        }
+
+        HideRouteLine();
+
+        Debug.Log(
+            "FinalRoadCheckpoint alcanzado."
+        );
     }
 }

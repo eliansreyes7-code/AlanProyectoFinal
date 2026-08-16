@@ -56,8 +56,70 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 8684217387902351883, guid: 618ee09bcaa314f5a88c2530cf317d62, type: 3}
+      propertyPath: m_Size.x
+      value: 1.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 8684217387902351883, guid: 618ee09bcaa314f5a88c2530cf317d62, type: 3}
+      propertyPath: m_Size.y
+      value: 1.74
+      objectReference: {fileID: 0}
+    - target: {fileID: 8684217387902351883, guid: 618ee09bcaa314f5a88c2530cf317d62, type: 3}
+      propertyPath: m_Size.z
+      value: 4.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8684217387902351883, guid: 618ee09bcaa314f5a88c2530cf317d62, type: 3}
+      propertyPath: m_Center.y
+      value: -0.77
+      objectReference: {fileID: 0}
+    - target: {fileID: 8684217387902351883, guid: 618ee09bcaa314f5a88c2530cf317d62, type: 3}
+      propertyPath: m_IsTrigger
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 5169196928808439734, guid: 618ee09bcaa314f5a88c2530cf317d62, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: -280198050091185705}
+    - targetCorrespondingSourceObject: {fileID: 5169196928808439734, guid: 618ee09bcaa314f5a88c2530cf317d62, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1833595009657063934}
   m_SourcePrefab: {fileID: 100100000, guid: 618ee09bcaa314f5a88c2530cf317d62, type: 3}
+--- !u!1 &8537409073706939774 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 5169196928808439734, guid: 618ee09bcaa314f5a88c2530cf317d62, type: 3}
+  m_PrefabInstance: {fileID: 3586648066462415560}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &-280198050091185705
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8537409073706939774}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 205223f7fa96a4d068d2945b4ac7f2d4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::VehiclePlayerHit
+  hitBehaviour: 0
+  respawnPoint: {fileID: 0}
+  sceneToLoad: office
+  whiteFlash: {fileID: 0}
+  flashInDuration: 0.15
+  whiteHoldDuration: 0.25
+  flashOutDuration: 0.5
+--- !u!114 &1833595009657063934
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8537409073706939774}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d17a5a7d4fec342a59b5baeced70ca7f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::VehicleFrontSensor
