@@ -2,29 +2,16 @@ using System.Collections;
 using TMPro;
 using UnityEngine;
 
-public class FinalRoadStart : MonoBehaviour
+public class RoadMessageTrigger : MonoBehaviour
 {
-    [Header("UI")]
     [SerializeField] private TMP_Text messageText;
 
-    [Header("Traffic")]
-    [SerializeField] private GameObject finalTrafficSystem;
-
-    [Header("Message")]
-    [SerializeField] private float messageDuration = 4f;
+    [SerializeField] private float duration = 4f;
 
     private bool activated = false;
 
     private void Start()
     {
-        // IMPORTANTE:
-        // tráfico SIEMPRE activo desde el inicio.
-        if (finalTrafficSystem != null)
-        {
-            finalTrafficSystem.SetActive(true);
-        }
-
-        // Solo ocultamos el mensaje.
         if (messageText != null)
         {
             messageText.text = "";
@@ -38,7 +25,8 @@ public class FinalRoadStart : MonoBehaviour
             return;
 
         WheelchairController player =
-            other.GetComponentInParent<WheelchairController>();
+            other.GetComponentInParent
+                <WheelchairController>();
 
         if (player == null)
             return;
@@ -61,10 +49,11 @@ public class FinalRoadStart : MonoBehaviour
             "Intenta cruzar la carretera";
 
         yield return new WaitForSeconds(
-            messageDuration
+            duration
         );
 
         messageText.text = "";
+
         messageText.gameObject.SetActive(false);
     }
 }
