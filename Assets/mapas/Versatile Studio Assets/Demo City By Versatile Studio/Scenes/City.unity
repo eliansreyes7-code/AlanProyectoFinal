@@ -8685,6 +8685,71 @@ MonoBehaviour:
   m_ShadowLayerMask: 1
   m_RenderingLayers: 1
   m_ShadowRenderingLayers: 1
+--- !u!1001 &74327953
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 1972670460561210176, guid: dbdae4e3599204a69918a8f2750aec93, type: 3}
+      propertyPath: m_Name
+      value: Car_Final
+      objectReference: {fileID: 0}
+    - target: {fileID: 3081712537567991525, guid: dbdae4e3599204a69918a8f2750aec93, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 183.40804
+      objectReference: {fileID: 0}
+    - target: {fileID: 3081712537567991525, guid: dbdae4e3599204a69918a8f2750aec93, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 17.63
+      objectReference: {fileID: 0}
+    - target: {fileID: 3081712537567991525, guid: dbdae4e3599204a69918a8f2750aec93, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -287.2372
+      objectReference: {fileID: 0}
+    - target: {fileID: 3081712537567991525, guid: dbdae4e3599204a69918a8f2750aec93, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0.7071068
+      objectReference: {fileID: 0}
+    - target: {fileID: 3081712537567991525, guid: dbdae4e3599204a69918a8f2750aec93, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3081712537567991525, guid: dbdae4e3599204a69918a8f2750aec93, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -0.7071068
+      objectReference: {fileID: 0}
+    - target: {fileID: 3081712537567991525, guid: dbdae4e3599204a69918a8f2750aec93, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3081712537567991525, guid: dbdae4e3599204a69918a8f2750aec93, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3081712537567991525, guid: dbdae4e3599204a69918a8f2750aec93, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: -90
+      objectReference: {fileID: 0}
+    - target: {fileID: 3081712537567991525, guid: dbdae4e3599204a69918a8f2750aec93, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents:
+    - {fileID: 6292002105415433733, guid: dbdae4e3599204a69918a8f2750aec93, type: 3}
+    - {fileID: 2030573394035874042, guid: dbdae4e3599204a69918a8f2750aec93, type: 3}
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 1972670460561210176, guid: dbdae4e3599204a69918a8f2750aec93, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1642422971}
+    - targetCorrespondingSourceObject: {fileID: 1972670460561210176, guid: dbdae4e3599204a69918a8f2750aec93, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1642422970}
+  m_SourcePrefab: {fileID: 100100000, guid: dbdae4e3599204a69918a8f2750aec93, type: 3}
 --- !u!1001 &74329921
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -188966,6 +189031,37 @@ MonoBehaviour:
   m_ShadowLayerMask: 1
   m_RenderingLayers: 1
   m_ShadowRenderingLayers: 1
+--- !u!1 &1642422969 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1972670460561210176, guid: dbdae4e3599204a69918a8f2750aec93, type: 3}
+  m_PrefabInstance: {fileID: 74327953}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1642422970
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1642422969}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 59d0a4e0d02c8441698cc529c11b7024, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::FinalRoadHit
+  officeSceneName: office
+--- !u!114 &1642422971
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1642422969}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 85b1e8911529a49919ea5cfc4f3982a1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::FinalRoadCar
+  speed: 8
 --- !u!114 &1644040632
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -239530,7 +239626,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e570bd0c962ad4be6884eef48cd9f60e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::FinalRoadSpawner
-  carPrefab: {fileID: 354868266}
+  carPrefab: {fileID: 1642422969}
   spawnPoint: {fileID: 1907862728}
   endPoint: {fileID: 685101217}
   spawnInterval: 2
@@ -244637,6 +244733,10 @@ PrefabInstance:
     m_TransformParent: {fileID: 1630180189}
     m_Modifications:
     - target: {fileID: -8390954903202624781, guid: 618ee09bcaa314f5a88c2530cf317d62, type: 3}
+      propertyPath: respawnDelay
+      value: 1.03
+      objectReference: {fileID: 0}
+    - target: {fileID: -8390954903202624781, guid: 618ee09bcaa314f5a88c2530cf317d62, type: 3}
       propertyPath: respawnPoint
       value: 
       objectReference: {fileID: 440880625}
@@ -244817,3 +244917,4 @@ SceneRoots:
   - {fileID: 984375893}
   - {fileID: 2095222394}
   - {fileID: 155056134}
+  - {fileID: 74327953}
