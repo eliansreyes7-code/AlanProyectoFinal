@@ -7,6 +7,9 @@ public class DogChallengeManager : MonoBehaviour
     // =====================================================
     // PERRO
     // =====================================================
+    [Header("Dog Audio")]
+    [SerializeField] private AudioSource dogAudioSource;
+    [SerializeField] private AudioClip multipleBarksSound;
 
     [Header("Dog")]
     [SerializeField] private DogAI dog;
@@ -266,6 +269,14 @@ public class DogChallengeManager : MonoBehaviour
         ShowChallengeText(
             dangerMessage
         );
+
+        if (dogAudioSource != null &&
+    multipleBarksSound != null)
+        {
+            dogAudioSource.PlayOneShot(
+                multipleBarksSound
+            );
+        }
 
         if (cameraLook != null &&
             dogLookTarget != null)
