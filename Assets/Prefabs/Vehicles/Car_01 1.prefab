@@ -166,6 +166,14 @@ MonoBehaviour:
   maxSpeed: 6
   acceleration: 4
   braking: 8
+  roadLayer:
+    serializedVersion: 2
+    m_Bits: 512
+  roadRayHeight: 6
+  roadRayDistance: 20
+  roadOffset: 0.03
+  roadHeightFollowSpeed: 15
+  showRoadRay: 1
   trafficLight: {fileID: 0}
   stopPoint: {fileID: 0}
   trafficExitPoint: {fileID: 0}

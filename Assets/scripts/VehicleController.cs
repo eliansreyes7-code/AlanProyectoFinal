@@ -22,6 +22,36 @@ public class VehicleController : MonoBehaviour
     [SerializeField] private float braking = 20f;
 
     // =====================================================
+    // ALTURA DE LA CALLE
+    // =====================================================
+
+    [Header("Road Height")]
+
+    [Tooltip("Layer de la superficie de la carretera.")]
+    [SerializeField] private LayerMask roadLayer;
+
+    [Tooltip("Altura desde donde comienzan los Raycasts.")]
+    [SerializeField] private float roadRayHeight = 6f;
+
+    [Tooltip("Distancia máxima de búsqueda hacia abajo.")]
+    [SerializeField] private float roadRayDistance = 20f;
+
+    [Tooltip("Pequeña separación entre el carro y la calle.")]
+    [SerializeField] private float roadOffset = 0.03f;
+
+    [Tooltip("Distancia de las muestras delante y detrás del carro.")]
+    [SerializeField] private float roadSampleDistance = 1.5f;
+
+    [Tooltip("Cambios de altura menores que este valor son ignorados para evitar temblores.")]
+    [SerializeField] private float roadHeightDeadZone = 0.04f;
+
+    [Tooltip("Velocidad con la que el vehículo sigue las subidas y bajadas.")]
+    [SerializeField] private float roadHeightFollowSpeed = 10f;
+
+    [Tooltip("Mostrar los Raycasts de suelo en Scene.")]
+    [SerializeField] private bool showRoadRay = true;
+
+    // =====================================================
     // SEMÁFORO
     // =====================================================
 
@@ -58,6 +88,10 @@ public class VehicleController : MonoBehaviour
     [Tooltip("Distancia lateral máxima para considerarlo del mismo carril.")]
     [SerializeField] private float laneTolerance = 1.5f;
 
+    // =====================================================
+    // DEBUG
+    // =====================================================
+
     [Header("Debug")]
     [SerializeField] private bool showSafetyZone = true;
 
@@ -73,6 +107,7 @@ public class VehicleController : MonoBehaviour
     // =====================================================
 
     private Rigidbody rb;
+    private Collider vehicleCollider;
 
     private float currentSpeed = 0f;
 
@@ -84,6 +119,12 @@ public class VehicleController : MonoBehaviour
 
     private VehicleController vehicleAhead = null;
 
+    /*
+     * Distancia desde el pivot del prefab
+     * hasta la parte inferior de su collider.
+     */
+    private float pivotToColliderBottom = 0f;
+
     // =====================================================
     // AWAKE
     // =====================================================
@@ -92,6 +133,19 @@ public class VehicleController : MonoBehaviour
     {
         rb = GetComponent<Rigidbody>();
 
+        vehicleCollider =
+            GetComponent<Collider>();
+
+        // =================================================
+        // RIGIDBODY
+        // =================================================
+
+        /*
+         * IMPORTANTE:
+         *
+         * Lo dejamos dinámico porque así estaba
+         * avanzando correctamente.
+         */
         rb.useGravity = false;
         rb.isKinematic = false;
 
@@ -101,15 +155,29 @@ public class VehicleController : MonoBehaviour
         rb.collisionDetectionMode =
             CollisionDetectionMode.ContinuousDynamic;
 
+        /*
+         * NO congelamos Y porque el carro
+         * necesita subir y bajar con la carretera.
+         */
         rb.constraints =
-            RigidbodyConstraints.FreezePositionY |
             RigidbodyConstraints.FreezeRotationX |
             RigidbodyConstraints.FreezeRotationZ;
 
-        /*
-         * Si olvidaste arrastrar el SafetySensorPoint,
-         * intenta buscarlo automáticamente por nombre.
-         */
+        // =================================================
+        // ALTURA DEL COLLIDER
+        // =================================================
+
+        if (vehicleCollider != null)
+        {
+            pivotToColliderBottom =
+                transform.position.y -
+                vehicleCollider.bounds.min.y;
+        }
+
+        // =================================================
+        // BUSCAR SAFETY SENSOR
+        // =================================================
+
         if (safetySensorPoint == null)
         {
             Transform found =
@@ -117,7 +185,8 @@ public class VehicleController : MonoBehaviour
 
             if (found != null)
             {
-                safetySensorPoint = found;
+                safetySensorPoint =
+                    found;
             }
         }
 
@@ -131,7 +200,7 @@ public class VehicleController : MonoBehaviour
     }
 
     // =====================================================
-    // SETUP DESDE SPAWNER
+    // SETUP DESDE VEHICLE SPAWNER
     // =====================================================
 
     public void Setup(
@@ -156,16 +225,17 @@ public class VehicleController : MonoBehaviour
 
         passedTrafficLight = false;
 
-        /*
-         * El carro mantiene la dirección
-         * con la que salió del SpawnPoint.
-         */
+        // =================================================
+        // DIRECCIÓN DEL CARRIL
+        // =================================================
+
         laneDirection =
             transform.forward;
 
         laneDirection.y = 0f;
 
-        if (laneDirection.sqrMagnitude > 0.001f)
+        if (laneDirection.sqrMagnitude >
+            0.001f)
         {
             laneDirection.Normalize();
         }
@@ -174,6 +244,12 @@ public class VehicleController : MonoBehaviour
             laneDirection =
                 Vector3.forward;
         }
+
+        // =================================================
+        // COLOCAR EL CARRO SOBRE LA CALLE AL NACER
+        // =================================================
+
+        SnapImmediatelyToRoad();
     }
 
     // =====================================================
@@ -185,16 +261,25 @@ public class VehicleController : MonoBehaviour
         if (destinationPoint == null)
             return;
 
-        // 1. Revisar si ya salió del semáforo.
+        /*
+         * IMPORTANTE:
+         *
+         * Ya NO hacemos SnapImmediatelyToRoad()
+         * en cada FixedUpdate.
+         *
+         * Solo se hace cuando nace el carro.
+         */
+
+        // 1. Revisar salida del semáforo.
         CheckTrafficExit();
 
-        // 2. Buscar vehículos delante.
+        // 2. Buscar carros delante.
         DetectVehicleAhead();
 
-        // 3. Mover.
+        // 3. Movimiento + altura.
         MoveVehicle();
 
-        // 4. Revisar final.
+        // 4. Revisar destino.
         CheckDestination();
     }
 
@@ -210,10 +295,6 @@ public class VehicleController : MonoBehaviour
         if (safetySensorPoint == null)
             return;
 
-        /*
-         * La caja empieza exactamente en
-         * SafetySensorPoint y se extiende hacia delante.
-         */
         Vector3 center =
             safetySensorPoint.position +
             laneDirection *
@@ -226,14 +307,6 @@ public class VehicleController : MonoBehaviour
                 safetyLength * 0.5f
             );
 
-        /*
-         * NO usamos Layers.
-         * NO usamos Tags.
-         *
-         * Revisamos todos los colliders
-         * y después preguntamos si pertenecen
-         * a un VehicleController.
-         */
         Collider[] hits =
             Physics.OverlapBox(
                 center,
@@ -252,19 +325,16 @@ public class VehicleController : MonoBehaviour
                 continue;
 
             VehicleController other =
-                hit.GetComponentInParent<VehicleController>();
+                hit.GetComponentInParent
+                <VehicleController>();
 
             if (other == null)
                 continue;
 
-            // No detectarnos a nosotros mismos.
+            // No detectarse a sí mismo.
             if (other == this)
                 continue;
 
-            /*
-             * Posición del otro carro respecto
-             * a nuestro carro.
-             */
             Vector3 localPosition =
                 transform.InverseTransformPoint(
                     other.transform.position
@@ -274,17 +344,13 @@ public class VehicleController : MonoBehaviour
             if (localPosition.z <= 0f)
                 continue;
 
-            /*
-             * Está demasiado desplazado lateralmente:
-             * probablemente pertenece al otro carril.
-             */
+            // Está en otro carril.
             if (Mathf.Abs(localPosition.x) >
                 laneTolerance)
             {
                 continue;
             }
 
-            // Nos quedamos con el carro más cercano.
             if (localPosition.z <
                 nearestForwardDistance)
             {
@@ -307,20 +373,10 @@ public class VehicleController : MonoBehaviour
     private void MoveVehicle()
     {
         // =================================================
-        // PRIORIDAD ABSOLUTA:
+        // PRIORIDAD:
         // VEHÍCULO DELANTE
         // =================================================
 
-        /*
-         * Si hay otro carro dentro de nuestra
-         * zona de seguridad:
-         *
-         * STOP.
-         *
-         * No revisamos StopPoint.
-         * No revisamos semáforo.
-         * No avanzamos.
-         */
         if (vehicleAheadDetected)
         {
             EmergencyStop();
@@ -328,7 +384,7 @@ public class VehicleController : MonoBehaviour
         }
 
         // =================================================
-        // SOLO AHORA REVISAMOS EL SEMÁFORO
+        // SEMÁFORO
         // =================================================
 
         bool stopForLight =
@@ -361,7 +417,7 @@ public class VehicleController : MonoBehaviour
             Time.fixedDeltaTime;
 
         // =================================================
-        // SEGUNDA COMPROBACIÓN JUSTO ANTES DE MOVER
+        // SEGUNDA REVISIÓN DE CARRO DELANTE
         // =================================================
 
         DetectVehicleAhead();
@@ -376,13 +432,6 @@ public class VehicleController : MonoBehaviour
         // STOP POINT
         // =================================================
 
-        /*
-         * Llegamos aquí únicamente si NO hay
-         * carro delante.
-         *
-         * Así que normalmente solamente el
-         * primer carro de la fila usa StopPoint.
-         */
         if (stopForLight &&
             stopPoint != null)
         {
@@ -412,7 +461,7 @@ public class VehicleController : MonoBehaviour
         }
 
         // =================================================
-        // MOVER RECTO
+        // SIN MOVIMIENTO
         // =================================================
 
         if (movementDistance <= 0f)
@@ -421,14 +470,236 @@ public class VehicleController : MonoBehaviour
             return;
         }
 
+        // =================================================
+        // CALCULAR POSICIÓN X / Z
+        // =================================================
+
         Vector3 nextPosition =
             rb.position +
             laneDirection *
             movementDistance;
 
+        // =================================================
+        // CALCULAR ALTURA DE LA CALLE
+        // =================================================
+
+        float roadY;
+
+        if (TryGetRoadHeight(
+            nextPosition,
+            out roadY))
+        {
+            float targetY =
+                roadY +
+                pivotToColliderBottom +
+                roadOffset;
+
+            float difference =
+                targetY -
+                rb.position.y;
+
+            // =============================================
+            // ZONA MUERTA ANTI-TEMBLOR
+            // =============================================
+
+            /*
+             * Si la diferencia es muy pequeña,
+             * no modificamos Y.
+             *
+             * Esto evita que el carro reaccione
+             * a pequeñas imperfecciones del Mesh.
+             */
+            if (Mathf.Abs(difference) <
+                roadHeightDeadZone)
+            {
+                nextPosition.y =
+                    rb.position.y;
+            }
+            else
+            {
+                // =========================================
+                // SEGUIR UNA SUBIDA O BAJADA REAL
+                // =========================================
+
+                nextPosition.y =
+                    Mathf.MoveTowards(
+                        rb.position.y,
+                        targetY,
+                        roadHeightFollowSpeed *
+                        Time.fixedDeltaTime
+                    );
+            }
+        }
+        else
+        {
+            /*
+             * Si por algún motivo no encontró
+             * carretera, conserva la altura actual.
+             */
+            nextPosition.y =
+                rb.position.y;
+        }
+
+        // =================================================
+        // MOVER UNA SOLA VEZ
+        // =================================================
+
         rb.MovePosition(
             nextPosition
         );
+    }
+
+    // =====================================================
+    // ALTURA PROMEDIO DE LA CARRETERA
+    // =====================================================
+
+    private bool TryGetRoadHeight(
+        Vector3 position,
+        out float roadY)
+    {
+        roadY =
+            position.y;
+
+        float totalHeight =
+            0f;
+
+        int validSamples =
+            0;
+
+        // =================================================
+        // MUESTRA 1: CENTRO
+        // =================================================
+
+        if (TryGetSingleRoadHeight(
+            position,
+            out float centerHeight))
+        {
+            totalHeight +=
+                centerHeight;
+
+            validSamples++;
+        }
+
+        // =================================================
+        // MUESTRA 2: DELANTE
+        // =================================================
+
+        Vector3 frontPosition =
+            position +
+            laneDirection *
+            roadSampleDistance;
+
+        if (TryGetSingleRoadHeight(
+            frontPosition,
+            out float frontHeight))
+        {
+            totalHeight +=
+                frontHeight;
+
+            validSamples++;
+        }
+
+        // =================================================
+        // MUESTRA 3: DETRÁS
+        // =================================================
+
+        Vector3 backPosition =
+            position -
+            laneDirection *
+            roadSampleDistance;
+
+        if (TryGetSingleRoadHeight(
+            backPosition,
+            out float backHeight))
+        {
+            totalHeight +=
+                backHeight;
+
+            validSamples++;
+        }
+
+        // =================================================
+        // NINGUNA MUESTRA ENCONTRÓ CALLE
+        // =================================================
+
+        if (validSamples == 0)
+        {
+            return false;
+        }
+
+        // =================================================
+        // PROMEDIO
+        // =================================================
+
+        roadY =
+            totalHeight /
+            validSamples;
+
+        return true;
+    }
+
+    // =====================================================
+    // UNA SOLA MUESTRA DE ALTURA
+    // =====================================================
+
+    private bool TryGetSingleRoadHeight(
+        Vector3 position,
+        out float roadY)
+    {
+        roadY =
+            position.y;
+
+        Vector3 rayOrigin =
+            position +
+            Vector3.up *
+            roadRayHeight;
+
+        if (Physics.Raycast(
+            rayOrigin,
+            Vector3.down,
+            out RaycastHit hit,
+            roadRayHeight +
+            roadRayDistance,
+            roadLayer,
+            QueryTriggerInteraction.Ignore))
+        {
+            roadY =
+                hit.point.y;
+
+            return true;
+        }
+
+        return false;
+    }
+
+    // =====================================================
+    // COLOCAR SOBRE LA CALLE AL NACER
+    // =====================================================
+
+    private void SnapImmediatelyToRoad()
+    {
+        if (rb == null)
+            return;
+
+        float roadY;
+
+        if (!TryGetRoadHeight(
+            rb.position,
+            out roadY))
+        {
+            return;
+        }
+
+        Vector3 correctedPosition =
+            rb.position;
+
+        correctedPosition.y =
+            roadY +
+            pivotToColliderBottom +
+            roadOffset;
+
+        rb.position =
+            correctedPosition;
     }
 
     // =====================================================
@@ -438,8 +709,8 @@ public class VehicleController : MonoBehaviour
     private bool ShouldStopForTrafficLight()
     {
         /*
-         * Si ya pasó TrafficExitPoint,
-         * no vuelve a obedecer este semáforo.
+         * Después de TrafficExitPoint
+         * ignora el semáforo.
          */
         if (passedTrafficLight)
             return false;
@@ -455,23 +726,18 @@ public class VehicleController : MonoBehaviour
                 stopPoint
             );
 
-        /*
-         * StopPoint ya está detrás.
-         * No detener.
-         */
+        // StopPoint está detrás.
         if (distanceToStop < 0f)
             return false;
 
-        /*
-         * Todavía está demasiado lejos.
-         */
+        // Todavía está demasiado lejos.
         if (distanceToStop >
             trafficDetectionDistance)
         {
             return false;
         }
 
-        // Solo rojo detiene.
+        // SOLO ROJO DETIENE.
         return trafficLight.CurrentState ==
                TrafficLightController
                    .TrafficState.Red;
@@ -501,9 +767,6 @@ public class VehicleController : MonoBehaviour
                 exitToVehicle
             );
 
-        /*
-         * Cruzó la línea imaginaria.
-         */
         if (passedAmount >= 0f)
         {
             passedTrafficLight = true;
@@ -524,6 +787,10 @@ public class VehicleController : MonoBehaviour
             point.position -
             rb.position;
 
+        /*
+         * La altura no afecta la lógica
+         * del semáforo.
+         */
         toPoint.y = 0f;
 
         return Vector3.Dot(
@@ -578,7 +845,8 @@ public class VehicleController : MonoBehaviour
 
     private void EmergencyStop()
     {
-        currentSpeed = 0f;
+        currentSpeed =
+            0f;
 
         rb.linearVelocity =
             Vector3.zero;
@@ -597,11 +865,15 @@ public class VehicleController : MonoBehaviour
 
         if (destroyAtEnd)
         {
-            Destroy(gameObject);
+            Destroy(
+                gameObject
+            );
         }
         else
         {
-            gameObject.SetActive(false);
+            gameObject.SetActive(
+                false
+            );
         }
     }
 
@@ -623,54 +895,126 @@ public class VehicleController : MonoBehaviour
     }
 
     // =====================================================
-    // MOSTRAR SENSOR EN SCENE
+    // GIZMOS
     // =====================================================
 
     private void OnDrawGizmosSelected()
     {
-        if (!showSafetyZone ||
-            safetySensorPoint == null)
+        // =================================================
+        // SENSOR DE VEHÍCULOS
+        // =================================================
+
+        if (showSafetyZone &&
+            safetySensorPoint != null)
         {
-            return;
-        }
+            Vector3 forward =
+                Application.isPlaying
+                    ? laneDirection
+                    : transform.forward;
 
-        Vector3 forward =
-            Application.isPlaying
-                ? laneDirection
-                : transform.forward;
+            forward.y = 0f;
 
-        forward.y = 0f;
+            if (forward.sqrMagnitude <
+                0.001f)
+            {
+                forward =
+                    transform.forward;
+            }
 
-        if (forward.sqrMagnitude < 0.001f)
-            forward = transform.forward;
+            forward.Normalize();
 
-        forward.Normalize();
+            Vector3 center =
+                safetySensorPoint.position +
+                forward *
+                (safetyLength * 0.5f);
 
-        Vector3 center =
-            safetySensorPoint.position +
-            forward *
-            (safetyLength * 0.5f);
+            Matrix4x4 previousMatrix =
+                Gizmos.matrix;
 
-        Matrix4x4 previousMatrix =
-            Gizmos.matrix;
+            Gizmos.matrix =
+                Matrix4x4.TRS(
+                    center,
+                    transform.rotation,
+                    Vector3.one
+                );
 
-        Gizmos.matrix =
-            Matrix4x4.TRS(
-                center,
-                transform.rotation,
-                Vector3.one
+            Gizmos.DrawWireCube(
+                Vector3.zero,
+                new Vector3(
+                    safetyWidth,
+                    safetyHeight,
+                    safetyLength
+                )
             );
 
-        Gizmos.DrawWireCube(
-            Vector3.zero,
-            new Vector3(
-                safetyWidth,
-                safetyHeight,
-                safetyLength
-            )
-        );
+            Gizmos.matrix =
+                previousMatrix;
+        }
 
-        Gizmos.matrix =
-            previousMatrix;
+        // =================================================
+        // RAYCASTS DE LA CALLE
+        // =================================================
+
+        if (showRoadRay)
+        {
+            Vector3 forward =
+                Application.isPlaying
+                    ? laneDirection
+                    : transform.forward;
+
+            forward.y = 0f;
+
+            if (forward.sqrMagnitude <
+                0.001f)
+            {
+                forward =
+                    transform.forward;
+            }
+
+            forward.Normalize();
+
+            // CENTRO
+            DrawRoadRay(
+                transform.position
+            );
+
+            // DELANTE
+            DrawRoadRay(
+                transform.position +
+                forward *
+                roadSampleDistance
+            );
+
+            // DETRÁS
+            DrawRoadRay(
+                transform.position -
+                forward *
+                roadSampleDistance
+            );
+        }
+    }
+
+    // =====================================================
+    // DIBUJAR RAY
+    // =====================================================
+
+    private void DrawRoadRay(
+        Vector3 position)
+    {
+        Vector3 origin =
+            position +
+            Vector3.up *
+            roadRayHeight;
+
+        Vector3 end =
+            origin +
+            Vector3.down *
+            (roadRayHeight +
+             roadRayDistance);
+
+        Gizmos.DrawLine(
+            origin,
+            end
+        );
     }
 }
