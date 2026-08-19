@@ -249692,7 +249692,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2633397635091961516, guid: 618ee09bcaa314f5a88c2530cf317d62, type: 3}
       propertyPath: m_Volume
-      value: 0.881
+      value: 0.488
       objectReference: {fileID: 0}
     - target: {fileID: 4071652789592696538, guid: 618ee09bcaa314f5a88c2530cf317d62, type: 3}
       propertyPath: m_UseGravity
