@@ -35,7 +35,7 @@ public class DoorSceneTransition : MonoBehaviour
 
     private void Update()
     {
-        if (playerInside && !isTransitioning && Input.GetKeyDown(KeyCode.E))
+        if (playerInside && !isTransitioning && Input.GetKeyDown(KeyCode.F))
         {
             StartCoroutine(TransitionToScene());
         }
