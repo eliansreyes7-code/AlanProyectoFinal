@@ -579,4 +579,5 @@ public class VehicleSpawner : MonoBehaviour
             activeSpawner = null;
         }
     }
+
 }
