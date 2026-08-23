@@ -1,94 +1,177 @@
 using System.Collections;
-using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class DoorSceneTransition : MonoBehaviour
 {
-    [Header("Scene")]
-    [SerializeField] private string sceneToLoad = "City";
+    // =====================================================
+    // ESCENA
+    // =====================================================
 
-    [Header("UI")]
-    [SerializeField] private GameObject messageObject;
-    [SerializeField] private Image flashImage;
+    [Header("Scene")]
+    [Tooltip("Nombre exacto de la escena del menú principal.")]
+    [SerializeField] private string sceneToLoad = "MainMenu";
+
+    // =====================================================
+    // FLASH
+    // =====================================================
 
     [Header("Flash")]
-    [SerializeField] private float flashDuration = 0.7f;
-    [SerializeField] private float waitBeforeLoad = 0.2f;
+    [Tooltip("Imagen blanca que cubre toda la pantalla.")]
+    [SerializeField] private Image flashImage;
 
-    private bool playerInside;
-    private bool isTransitioning;
+    [Tooltip("Tiempo que tarda la pantalla en ponerse blanca.")]
+    [SerializeField] private float flashDuration = 0.65f;
+
+    [Tooltip("Tiempo que permanece completamente blanca antes de cargar MainMenu.")]
+    [SerializeField] private float whiteHoldDuration = 0.12f;
+
+    // =====================================================
+    // VARIABLES
+    // =====================================================
+
+    private bool isTransitioning = false;
+
+    // =====================================================
+    // START
+    // =====================================================
 
     private void Start()
     {
-        if (messageObject != null)
-            messageObject.SetActive(false);
-
+        // Preparar el flash completamente transparente.
         if (flashImage != null)
         {
+            flashImage.gameObject.SetActive(true);
+
             Color color = flashImage.color;
             color.a = 0f;
             flashImage.color = color;
+
+            flashImage.raycastTarget = false;
         }
     }
 
-    private void Update()
-    {
-        if (playerInside && !isTransitioning && Input.GetKeyDown(KeyCode.F))
-        {
-            StartCoroutine(TransitionToScene());
-        }
-    }
+    // =====================================================
+    // TRIGGER
+    // =====================================================
 
     private void OnTriggerEnter(Collider other)
     {
-        if (!other.CompareTag("Player"))
+        if (isTransitioning)
             return;
 
-        playerInside = true;
+        WheelchairController player =
+            other.GetComponentInParent<WheelchairController>();
 
-        if (messageObject != null)
-            messageObject.SetActive(true);
-    }
+        if (player == null)
+        {
+            player =
+                other.GetComponent<WheelchairController>();
+        }
 
-    private void OnTriggerExit(Collider other)
-    {
-        if (!other.CompareTag("Player"))
+        if (player == null)
             return;
 
-        playerInside = false;
-
-        if (messageObject != null)
-            messageObject.SetActive(false);
+        StartCoroutine(
+            FinalTransition(player)
+        );
     }
 
-    private IEnumerator TransitionToScene()
+    // =====================================================
+    // TRANSICIÓN FINAL
+    // =====================================================
+
+    private IEnumerator FinalTransition(
+        WheelchairController player)
     {
         isTransitioning = true;
 
-        if (messageObject != null)
-            messageObject.SetActive(false);
+        // =================================================
+        // DETENER JUGADOR
+        // =================================================
 
-        float timer = 0f;
+        player.StopMovement();
+        player.enabled = false;
 
-        while (timer < flashDuration)
+        Rigidbody playerRb =
+            player.GetComponent<Rigidbody>();
+
+        if (playerRb != null)
         {
-            timer += Time.deltaTime;
-            float alpha = Mathf.Clamp01(timer / flashDuration);
-
-            if (flashImage != null)
-            {
-                Color color = flashImage.color;
-                color.a = alpha;
-                flashImage.color = color;
-            }
-
-            yield return null;
+            playerRb.linearVelocity = Vector3.zero;
+            playerRb.angularVelocity = Vector3.zero;
         }
 
-        yield return new WaitForSeconds(waitBeforeLoad);
+        // =================================================
+        // MUY IMPORTANTE:
+        // AVISAR AL MAIN MENU QUE DEBE MOSTRAR REFLECTION
+        // =================================================
 
-        SceneManager.LoadScene(sceneToLoad);
+        FinalGameState.showReflectionPanel = true;
+
+        Debug.Log(
+            "DoorSceneTransition -> ReflectionPanel solicitado."
+        );
+
+        // =================================================
+        // FLASH BLANCO
+        // =================================================
+
+        if (flashImage != null)
+        {
+            float timer = 0f;
+
+            Color color =
+                flashImage.color;
+
+            color.a = 0f;
+            flashImage.color = color;
+
+            while (timer < flashDuration)
+            {
+                timer += Time.unscaledDeltaTime;
+
+                float t =
+                    Mathf.Clamp01(
+                        timer / flashDuration
+                    );
+
+                // Entrada suave al blanco.
+                t =
+                    Mathf.SmoothStep(
+                        0f,
+                        1f,
+                        t
+                    );
+
+                color.a = t;
+                flashImage.color = color;
+
+                yield return null;
+            }
+
+            color.a = 1f;
+            flashImage.color = color;
+        }
+
+        // =================================================
+        // MANTENER BLANCO UN INSTANTE
+        // =================================================
+
+        if (whiteHoldDuration > 0f)
+        {
+            yield return new WaitForSecondsRealtime(
+                whiteHoldDuration
+            );
+        }
+
+        // =================================================
+        // CARGAR MAIN MENU
+        // =================================================
+
+        SceneManager.LoadScene(
+            sceneToLoad
+        );
     }
 }
