@@ -1,5 +1,6 @@
 using System.Collections;
 using UnityEngine;
+using TMPro;
 
 public class Office2WakeUp : MonoBehaviour
 {
@@ -98,6 +99,7 @@ public class Office2WakeUp : MonoBehaviour
     private Quaternion frontRotation;
 
     private bool sequenceRunning = false;
+    private bool missionMustStayVisible = false;
 
     // =====================================================
     // AWAKE
@@ -138,6 +140,44 @@ public class Office2WakeUp : MonoBehaviour
 
     private void Start()
     {
+        // =================================================
+        // BUSCAR UI AUTOMÁTICAMENTE SI FALTA REFERENCIA
+        // =================================================
+
+        if (missionUI == null)
+        {
+            missionUI = FindSceneObjectByName("mision");
+
+            if (missionUI != null)
+            {
+                Debug.Log(
+                    "Office2WakeUp: misión encontrada automáticamente.",
+                    missionUI
+                );
+            }
+            else
+            {
+                Debug.LogError(
+                    "Office2WakeUp: no se encontró el objeto 'mision'. Asigna Mission UI en el Inspector."
+                );
+            }
+        }
+
+        if (controlsUI == null)
+        {
+            controlsUI = FindSceneObjectByName("ControlesUI");
+        }
+
+        if (exitPrompt == null)
+        {
+            exitPrompt = FindSceneObjectByName("Salir");
+        }
+
+        // Mantener toda la UI apagada durante la cinemática.
+        SetUIState(missionUI, false);
+        SetUIState(controlsUI, false);
+        SetUIState(exitPrompt, false);
+
         // =================================================
         // BUSCAR PLAYER
         // =================================================
@@ -435,10 +475,8 @@ public class Office2WakeUp : MonoBehaviour
         // MOSTRAR MISIÓN
         // =================================================
 
-        if (missionUI != null)
-        {
-            missionUI.SetActive(true);
-        }
+        missionMustStayVisible = true;
+        ForceShowMission();
 
         // =================================================
         // MOSTRAR Q / E / F
@@ -446,7 +484,7 @@ public class Office2WakeUp : MonoBehaviour
 
         if (controlsUI != null)
         {
-            controlsUI.SetActive(true);
+            ForceShowUI(controlsUI);
 
             Debug.Log(
                 "Office2WakeUp: ControlesUI ACTIVADO.",
@@ -471,6 +509,165 @@ public class Office2WakeUp : MonoBehaviour
         Debug.Log(
             "Office2WakeUp: secuencia completada."
         );
+    }
+
+    // =====================================================
+    // MANTENER MISIÓN VISIBLE DESPUÉS DE LA CINEMÁTICA
+    // =====================================================
+
+    private void LateUpdate()
+    {
+        if (missionMustStayVisible)
+        {
+            ForceShowMission();
+        }
+    }
+
+    private void ForceShowMission()
+    {
+        if (missionUI == null)
+        {
+            Debug.LogError(
+                "Office2WakeUp: Mission UI NO está asignado."
+            );
+
+            missionMustStayVisible = false;
+            return;
+        }
+
+        // Activar padres.
+        Transform parent = missionUI.transform.parent;
+
+        while (parent != null)
+        {
+            if (!parent.gameObject.activeSelf)
+            {
+                parent.gameObject.SetActive(true);
+            }
+
+            parent = parent.parent;
+        }
+
+        // Activar el objeto principal de misión.
+        if (!missionUI.activeSelf)
+        {
+            missionUI.SetActive(true);
+        }
+
+        // Activar todos los hijos.
+        Transform[] children =
+            missionUI.GetComponentsInChildren<Transform>(true);
+
+        foreach (Transform child in children)
+        {
+            if (!child.gameObject.activeSelf)
+            {
+                child.gameObject.SetActive(true);
+            }
+        }
+
+        // Asegurar CanvasGroup visibles.
+        CanvasGroup[] groups =
+            missionUI.GetComponentsInChildren<CanvasGroup>(true);
+
+        foreach (CanvasGroup group in groups)
+        {
+            group.alpha = 1f;
+            group.interactable = false;
+            group.blocksRaycasts = false;
+        }
+
+        // Asegurar TextMeshPro visible.
+        TMP_Text[] texts =
+            missionUI.GetComponentsInChildren<TMP_Text>(true);
+
+        foreach (TMP_Text text in texts)
+        {
+            text.enabled = true;
+
+            Color color = text.color;
+            color.a = 1f;
+            text.color = color;
+
+            if (text.font == null)
+            {
+                Debug.LogError(
+                    "Office2WakeUp: el texto '" +
+                    text.gameObject.name +
+                    "' de la misión NO tiene Font Asset asignado.",
+                    text
+                );
+            }
+        }
+    }
+
+    // =====================================================
+    // UTILIDADES DE UI
+    // =====================================================
+
+    private void SetUIState(
+        GameObject target,
+        bool state)
+    {
+        if (target == null)
+            return;
+
+        target.SetActive(state);
+    }
+
+    private void ForceShowUI(
+        GameObject target)
+    {
+        if (target == null)
+            return;
+
+        Transform parent = target.transform.parent;
+
+        while (parent != null)
+        {
+            if (!parent.gameObject.activeSelf)
+            {
+                parent.gameObject.SetActive(true);
+            }
+
+            parent = parent.parent;
+        }
+
+        target.SetActive(true);
+
+        CanvasGroup[] groups =
+            target.GetComponentsInChildren<CanvasGroup>(true);
+
+        foreach (CanvasGroup group in groups)
+        {
+            group.alpha = 1f;
+        }
+    }
+
+    private GameObject FindSceneObjectByName(
+        string objectName)
+    {
+        Transform[] allTransforms =
+            FindObjectsByType<Transform>(
+                FindObjectsInactive.Include,
+                FindObjectsSortMode.None
+            );
+
+        foreach (Transform item in allTransforms)
+        {
+            if (item == null)
+                continue;
+
+            if (item.gameObject.scene != gameObject.scene)
+                continue;
+
+            if (item.name == objectName)
+            {
+                return item.gameObject;
+            }
+        }
+
+        return null;
     }
 
     // =====================================================
