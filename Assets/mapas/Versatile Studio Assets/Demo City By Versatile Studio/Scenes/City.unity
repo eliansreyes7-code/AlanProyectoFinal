@@ -27145,7 +27145,7 @@ GameObject:
   m_Layer: 0
   m_Name: Bone
   m_TagString: Untagged
-  m_Icon: {fileID: 7250588514170254948, guid: 0000000000000000d000000000000000, type: 0}
+  m_Icon: {fileID: 4162164826716764455, guid: 0000000000000000d000000000000000, type: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
@@ -27213,7 +27213,6 @@ MeshRenderer:
   m_RendererPriority: 0
   m_Materials:
   - {fileID: 2100000, guid: 158491389cf3eba4b95aa8e670148431, type: 2}
-  - {fileID: -1275737930099830017, guid: 40a4cc0b9ceb9614ba2d5d2feb86b8f5, type: 3}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -251553,7 +251552,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5169196928808439734, guid: 618ee09bcaa314f5a88c2530cf317d62, type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5169196928808439734, guid: 618ee09bcaa314f5a88c2530cf317d62, type: 3}
       propertyPath: m_TagString
