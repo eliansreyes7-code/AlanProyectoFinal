@@ -2219,7 +2219,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 'Presiona ''F'' para salir '
+  m_text: 
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: cdbbaebfd4ce6f64ba4dddd383156ff2, type: 2}
   m_sharedMaterial: {fileID: -4434638973773958213, guid: cdbbaebfd4ce6f64ba4dddd383156ff2, type: 2}
