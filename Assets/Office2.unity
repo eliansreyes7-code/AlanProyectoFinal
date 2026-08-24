@@ -25,7 +25,7 @@ RenderSettings:
   m_AmbientGroundColor: {r: 0.047, g: 0.043, b: 0.035, a: 1}
   m_AmbientIntensity: 1
   m_AmbientMode: 0
-  m_SubtractiveShadowColor: {r: 0.42, g: 0.478, b: 0.627, a: 1}
+  m_SubtractiveShadowColor: {r: 0.19606265, g: 0.21195757, b: 0.2528302, a: 1}
   m_SkyboxMaterial: {fileID: 2100000, guid: eac2ef371405749e0bd050b4c3272f16, type: 2}
   m_HaloStrength: 0.5
   m_FlareStrength: 1
@@ -94,7 +94,7 @@ LightmapSettings:
     m_TrainingDataDestination: TrainingData
     m_LightProbeSampleCountMultiplier: 4
   m_LightingDataAsset: {fileID: 112000000, guid: 65d2acc354c555f40b671e4490065755, type: 2}
-  m_LightingSettings: {fileID: 4890085278179872738, guid: b4002c553459e4873859bae63980d866, type: 2}
+  m_LightingSettings: {fileID: 4890085278179872738, guid: d97b425c42fb94bd6b9c9ed101dc4078, type: 2}
 --- !u!196 &4
 NavMeshSettings:
   serializedVersion: 2
@@ -2256,7 +2256,7 @@ Light:
   m_Enabled: 1
   serializedVersion: 12
   m_Type: 2
-  m_Color: {r: 0.72954786, g: 0.77104133, b: 0.78113204, a: 1}
+  m_Color: {r: 0.78867924, g: 0.78645515, b: 0.61755073, a: 1}
   m_Intensity: 1
   m_Range: 10.23
   m_SpotAngle: 30
@@ -4429,7 +4429,7 @@ Light:
   m_Enabled: 1
   serializedVersion: 12
   m_Type: 1
-  m_Color: {r: 0.72954786, g: 0.77104133, b: 0.78113204, a: 1}
+  m_Color: {r: 0.6754716, g: 0.6754716, b: 0.6754716, a: 1}
   m_Intensity: 1
   m_Range: 10
   m_SpotAngle: 30
@@ -4996,7 +4996,7 @@ Light:
   m_Enabled: 1
   serializedVersion: 12
   m_Type: 0
-  m_Color: {r: 0.72954786, g: 0.77104133, b: 0.78113204, a: 1}
+  m_Color: {r: 0.78867924, g: 0.78645515, b: 0.61755073, a: 1}
   m_Intensity: 1
   m_Range: 13.22
   m_SpotAngle: 127
@@ -5277,7 +5277,7 @@ AudioSource:
   m_audioClip: {fileID: 0}
   m_Resource: {fileID: 0}
   m_PlayOnAwake: 0
-  m_Volume: 1
+  m_Volume: 0.681
   m_Pitch: 1
   Loop: 0
   Mute: 0
@@ -5321,7 +5321,7 @@ AudioSource:
     m_Curve:
     - serializedVersion: 3
       time: 0
-      value: 0
+      value: 0.549
       inSlope: 0
       outSlope: 0
       tangentMode: 0
@@ -13077,6 +13077,135 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 0.88000005, y: 2.0100005, z: 0.16261889}
   m_Center: {x: 0, y: -0.00000047683716, z: 0.00000047683716}
+--- !u!1 &1011193092
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1011193094}
+  - component: {fileID: 1011193093}
+  m_Layer: 0
+  m_Name: BackgroundAudio
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!82 &1011193093
+AudioSource:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1011193092}
+  m_Enabled: 1
+  serializedVersion: 4
+  OutputAudioMixerGroup: {fileID: 0}
+  m_audioClip: {fileID: 0}
+  m_Resource: {fileID: 8300000, guid: e50c8a23bbaad8347a028889ffa0d7df, type: 3}
+  m_PlayOnAwake: 1
+  m_Volume: 0.068
+  m_Pitch: 1
+  Loop: 1
+  Mute: 0
+  Spatialize: 0
+  SpatializePostEffects: 0
+  Priority: 153
+  DopplerLevel: 1
+  MinDistance: 1
+  MaxDistance: 500
+  Pan2D: 0
+  rolloffMode: 0
+  BypassEffects: 0
+  BypassListenerEffects: 0
+  BypassReverbZones: 0
+  rolloffCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 1
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  panLevelCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0.842
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  spreadCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  reverbZoneMixCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+--- !u!4 &1011193094
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1011193092}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 24.68804, y: 1.04359, z: 39.562}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &1016182832
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -14467,7 +14596,7 @@ AudioSource:
   m_audioClip: {fileID: 0}
   m_Resource: {fileID: 8300000, guid: d737d6145e9bf6c41a80c31d0052265e, type: 3}
   m_PlayOnAwake: 1
-  m_Volume: 0.35
+  m_Volume: 0.292
   m_Pitch: 1
   Loop: 1
   Mute: 0
@@ -14874,7 +15003,7 @@ Light:
   m_Enabled: 1
   serializedVersion: 12
   m_Type: 0
-  m_Color: {r: 0.72954786, g: 0.77104133, b: 0.78113204, a: 1}
+  m_Color: {r: 0.78867924, g: 0.78645515, b: 0.61755073, a: 1}
   m_Intensity: 1
   m_Range: 6.3681273
   m_SpotAngle: 127
@@ -20666,7 +20795,7 @@ Light:
   m_Enabled: 1
   serializedVersion: 12
   m_Type: 2
-  m_Color: {r: 0.72954786, g: 0.77104133, b: 0.78113204, a: 1}
+  m_Color: {r: 0.78867924, g: 0.78645515, b: 0.61755073, a: 1}
   m_Intensity: 1
   m_Range: 9.98
   m_SpotAngle: 30
@@ -21759,7 +21888,7 @@ Light:
   m_Enabled: 1
   serializedVersion: 12
   m_Type: 2
-  m_Color: {r: 0.72954786, g: 0.77104133, b: 0.78113204, a: 1}
+  m_Color: {r: 0.78867924, g: 0.78645515, b: 0.61755073, a: 1}
   m_Intensity: 1
   m_Range: 6.69
   m_SpotAngle: 30
@@ -22672,7 +22801,7 @@ Transform:
   m_GameObject: {fileID: 2045294798}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0.99543756, z: -0, w: 0.09541538}
-  m_LocalPosition: {x: -0.921, y: 0.26999998, z: 1.149}
+  m_LocalPosition: {x: -0.921, y: 0.218, z: 1.149}
   m_LocalScale: {x: 1.337438, y: 1.2227, z: 1.2586}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -23140,3 +23269,4 @@ SceneRoots:
   - {fileID: 1232796891}
   - {fileID: 418086070}
   - {fileID: 1125310556}
+  - {fileID: 1011193094}
